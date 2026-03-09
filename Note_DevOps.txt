@@ -37,20 +37,30 @@ pwd: vị trí hiện tại
 whoami: Đang đăng nhập trong phiên với user nào
 cd + url: Truy cập vào đường dẫn
 clear: Xóa toàn bộ trên cmd
+
+* Xem thông tin file/folder
 ls: Show toàn bộ file trong folder
 ls -l: Show theo list
 ls -a: Show những file ẩn
 ls -t: Show những file từ mới nhất đến cũ nhất
 ls -lta: Show toàn bộ file trong folder
+
+* Tạo folder
 mkdir name_folder: Tạo folder name_folder
 mkdir -p name_folder1/namefolder2: Tạo name_folder1 và name_folder2
+* Tạo file
 touch name_file: Tạo file name_file
+* Xóa file
 rm name_folder || name_file: Xóa foder hoặc file
 rm -r name_folder || name_file: Xóa folder hoặc file
 rm -rf name_folde || name_file: Xóa folder hoặc file không cần hỏi lại
+* Copy file
 cp file_1 url: Copy file_1 vào url
 cp -r folder_1 url: Copy folder vào url
+* Move file hoặc folder
 mv file_1 file: Chuyển file_1 sang thư mục hiện tại và đổi tên thành file
+mv file_1 folder: Chuyển file_1 sang thư mục hiện tại và đổi tên thành folder
+* Ghi file
 echo "DevOps": In nội dung
 echo "DevOps" > file_name: Hiển thị nội dung DevOps và ghi vào file_name
 echo "DevOps1" > file_name: Hiển thị nội dung DevOps1 và ghi đè DevOps ở file_name
@@ -76,22 +86,24 @@ traceroute -T -p Port DiaChiIP: Hiển thị thông tin kết nối
 	+ -T : TCP
 	+ -p: Port
 	
--- Tạo user và group
+* Tạo user
 useradd: Thêm user k điền thông tin và mật khẩu => thường sẽ vào thẳng luôn server
 adduser: Thêm user cần điền thông tin và mật khẩu => Muốn vào thì cần mật khẩu
 su user: Chuyển user
 crtl+D: Thoát user vừa chuyển
 deluser username: Xóa username
+exit : Thoát ra root
 vi /etc/passwd: Xem danh sách user vừa tạo
+
+* Tạo group
 groupadd group1: Tạo nhóm group1
 usermod -aG group1 user1: Thêm user1 vào nhóm group1
 deluser username groupname: Xóa username khỏi group
 groups username: Kiểm tra username có trong group nào
 
---Phân chủ sở hữu / Nhóm sở hữu
+* Phân chủ sở hữu / Nhóm sở hữu
 chown Chusohuu:Nhomsohuu folder/file : Phân quyền của 1 folder/file thành chusohuu/nhomsohuu khác
-	+ -R: Phân quyền từ cha đến con
---Phần quyền truy cập
+* Phần quyền truy cập
 chmod u=rwx folder_name: Phân quyền truy cập rwx cho chủ sở hữu ở folder_name => u đại diện cho chủ sở hữu
 chmod g=rwx folder_name: Phân quyền truy cập rwx cho chủ sở hữu ở folder_name => g đại diện nhóm sở hữu
 chmod o=rwx folder_name: Phân quyền truy cập rwx cho chủ sở hữu ở folder_name => o đại diện cho nhóm/người khác
@@ -100,9 +112,14 @@ chmod o=rwx folder_name: Phân quyền truy cập rwx cho chủ sở hữu ở f
 	+ x: excute => Thực thi
 chmod u=rwx,g=rw,o=wx folder_name: Phân quyền nhanh
 Truy cập kiểu số: r=4,w=2,x=1
-chmod 777 foler_name: Phần quyền truy cập full cho 3 đối tượng
+chmod 777 foler_name: Phần quyền truy cập full cho 3 đối tượng cho chủ sở hữu, nhóm sở hữu,người khác mỗi folder_name (con sẽ k phân quyền)
+chmod -R 777 folder_name: Phân quyền all
 
 
+* Cập nhật package
+sudo apt update: cập nhật danh sách package mới nhất
+sudo apt upgrade: nâng cấp các package đang cài
+* Cài đặt VIM
 - Cài đặt VIM - Công cụ trình sửa văn bản: sudo apt install vim -y
 - Tạo file VIM: VI file_name
 - Khi vào file_name: 
@@ -117,7 +134,20 @@ chmod 777 foler_name: Phần quyền truy cập full cho 3 đối tượng
 	+ :q => Enter => Thoát (Chỉ khi file không còn thay đổi mới thoát)
 	+ :q! => Enter => Thoát không lưu
 	+ :w => Enter => Chỉ lưu không thoát
-	+ :wq => Enter => Lưu và thoát
+	+ :wq || :x => Enter => Lưu và thoát
+scp file/folder (cần copy) username@ip_server:/url : Copy file/folder từ local sang server vào đường dẫn url
+
+* Cài NGINX:
+- Cài nginx: sudo apt install nginx -y => được lưu trong /etc/nginx
+- Những file cần chú ý nginx:
++ sites-available/default: Cấu hình port nginx
++ nginx.conf: Hiển thị thông tin nginx (hoặc dùng lệnh nginx -T)
+- Câu lệnh:
+nginx -t: Để test xem vấn đề gì khai
+systemctl restart nginx: Restart lại nginx
+nginx -s reload: Chỉ restart lại nginx những dự án thay đổi
+
+
 
 - Tư duy triển khai dự án:
 1. Dự án nào có công cụ tương ứng
@@ -129,3 +159,23 @@ Chú ý:
 2. Mỗi dự án sẽ có user riêng
 
 
+
+1. Build Dự án Nodejs
+- Cài nodejs và npm: sudo apt install nodejs npm -y
+- Nâp cấp Phiên bản node lên 18: curl -s https://deb.nodesource.com/setup_18.x | sudo bash
+	=> Sau đó cài lại npm apt install nodejs -y
+- Tạo user: adduser todolist
+- Phân quyền chủ sỡ hữu và nhóm sở hữu: chmod -R 777 /projects/todolist/dist/
+- Tạo file todolist.conf ở /etc/nginx/conf.d/
+server{
+ listen 8081;
+ root /home/huynq/projects/todolist/dist/;
+ index index.html;
+ try_files $uri $uri/ /index.html;
+}
+- Kiểm tra kết nối: nginx -t
+- Restart nginx: systemctl restart nginx
+- Thêm user vào nhóm sở hữu: usermod -aG todolist www-data
+- Restart nginx: systemctl restart nginx
+- Kiểm tra log: sudo tail -f /var/log/nginx/error.log
+- Tìm kiếm dữ liệu file: sudo nginx -T | grep -n "listen 8081"
