@@ -1,6 +1,4 @@
-
-
-* Cấu hình Mạng Brigde
+* Cấu hình Mạng Brigde => Nên dùng cho PC
 IP động: 192.168.1.17/24
 Cấu hình IP tĩnh
 Set IP tĩnh: nano /etc/netplan/
@@ -18,7 +16,7 @@ version: 2
 sau khi sửa xong gõ lệnh: netplan apply
 kiểm tra có ip: ip -4 addr
 
-* Cấu hình Mạng NAT
+* Cấu hình Mạng NAT => Nên dùng cho laptop
 IP động: 192.168.158.128/24
 Cấu hình IP tĩnh
 Set IP tĩnh: nano /etc/netplan/		
@@ -48,18 +46,23 @@ ls -lta: Show toàn bộ file trong folder
 * Tạo folder
 mkdir name_folder: Tạo folder name_folder
 mkdir -p name_folder1/namefolder2: Tạo name_folder1 và name_folder2
+
 * Tạo file
 touch name_file: Tạo file name_file
+
 * Xóa file
 rm name_folder || name_file: Xóa foder hoặc file
 rm -r name_folder || name_file: Xóa folder hoặc file
 rm -rf name_folde || name_file: Xóa folder hoặc file không cần hỏi lại
+
 * Copy file
 cp file_1 url: Copy file_1 vào url
 cp -r folder_1 url: Copy folder vào url
+
 * Move file hoặc folder
 mv file_1 file: Chuyển file_1 sang thư mục hiện tại và đổi tên thành file
 mv file_1 folder: Chuyển file_1 sang thư mục hiện tại và đổi tên thành folder
+
 * Ghi file
 echo "DevOps": In nội dung
 echo "DevOps" > file_name: Hiển thị nội dung DevOps và ghi vào file_name
@@ -67,8 +70,23 @@ echo "DevOps1" > file_name: Hiển thị nội dung DevOps1 và ghi đè DevOps 
 echo "DevOps2" >> file_name: Hiển thị nội dung DevOps và ghi thêm dòng DevOps2 ở file_name
 cat file_name: Đọc nội dung trong file_name
 history: Nội dung câu lệnh đã từng gõ
+
+* Tìm kiếm bằng tail
 tail -n 1 file_name: Hiển thị 1 dòng cuối cùng của file_name
 tail -f file_name: Xem dữ liệu realtime => Thoát khỏi Ctrl+C
+
+* Tìm kiếm từ khóa ở file
+grep keyword file_name: Tìm kiếm keyword trong file_name
+grep keyword *.log: Tìm kiếm keyword nhiều file có đuôi .log
+grep -i keyword file_name: Tìm kiếm không phân biệt chữ Hoa/thường
+grep -n keyword file_name: Hiển thị vị trí số dòng keyword đứng dòng nào
+grep -c keyword file_name: Đếm số từ có từ keyword
+grep -E "keyword1,keyword2" filename: Tìm dòng chứa keyword1 hoặc keyword2 (tìm nhiều từ)
+
+* Tìm kiếm file/folder:
+find . -name "file_name" : Tìm thư mục hiện tại có tên là file_name
+find . -iname "file_name" : Tìm thư mục hiện tại có tên là file_name (Không pb hoa/thường)
+
 * Câu lệnh nâng cao Linux
 free -m: Kiểm tra trạng thái RAM
 df -h: Kiểm tra trạng thái disk
@@ -103,6 +121,7 @@ groups username: Kiểm tra username có trong group nào
 
 * Phân chủ sở hữu / Nhóm sở hữu
 chown Chusohuu:Nhomsohuu folder/file : Phân quyền của 1 folder/file thành chusohuu/nhomsohuu khác
+
 * Phần quyền truy cập
 chmod u=rwx folder_name: Phân quyền truy cập rwx cho chủ sở hữu ở folder_name => u đại diện cho chủ sở hữu
 chmod g=rwx folder_name: Phân quyền truy cập rwx cho chủ sở hữu ở folder_name => g đại diện nhóm sở hữu
@@ -114,7 +133,6 @@ chmod u=rwx,g=rw,o=wx folder_name: Phân quyền nhanh
 Truy cập kiểu số: r=4,w=2,x=1
 chmod 777 foler_name: Phần quyền truy cập full cho 3 đối tượng cho chủ sở hữu, nhóm sở hữu,người khác mỗi folder_name (con sẽ k phân quyền)
 chmod -R 777 folder_name: Phân quyền all
-
 
 * Cập nhật package
 sudo apt update: cập nhật danh sách package mới nhất
@@ -147,8 +165,6 @@ nginx -t: Để test xem vấn đề gì khai
 systemctl restart nginx: Restart lại nginx
 nginx -s reload: Chỉ restart lại nginx những dự án thay đổi
 
-
-
 - Tư duy triển khai dự án:
 1. Dự án nào có công cụ tương ứng
 2. Chỉ cần lưu ý duy nhất là file cấu hình trong dự án
@@ -158,8 +174,15 @@ Chú ý:
 1. Mỗi dự án sẽ có thư mục riêng
 2. Mỗi dự án sẽ có user riêng
 
+- Các bước triển khai dự án Backend:
+B1. Cài đặt công cụ cần thiết => công cụ
+B2. Xem và sửa file cấu hình => file cấu hình
+B3. Cài đặt và thiết lập database => Cài đặt
+B4. Build dự án => build
+B5. Run dự án => Run
+B6. Kiểm tra hoạt động => Check
 
-
+* Build dự án
 1. Build Dự án Nodejs
 - Cài nodejs và npm: sudo apt install nodejs npm -y
 - Nâp cấp Phiên bản node lên 18: curl -s https://deb.nodesource.com/setup_18.x | sudo bash
@@ -179,3 +202,41 @@ server{
 - Restart nginx: systemctl restart nginx
 - Kiểm tra log: sudo tail -f /var/log/nginx/error.log
 - Tìm kiếm dữ liệu file: sudo nginx -T | grep -n "listen 8081"
+
+2. Buid dự án FrontEnd-ReactJS
+Cách khác:
+Triển khai project vision
+B1. Copy project, giải nén, tạo user, gán quyền, phân quyền
+B2. Tạo file vision.service: vi /lib/systemd/system/vision.service
+[Service]
+Type=simple
+User=vision
+Restart=on-failure
+WorkingDirectory=/home/ec2-huynq1/projects/vision/
+ExecStart=npm run start -- --port=3000
+B3. systemctl daemon-reload : Restart lại service vừa thay đổi file
+B4. systemctl start vision: Khởi động service vision
+B5. systemctl status vision
+
+3. Build dự án Java-Springboot Project
+B1. Copy project, giải nén, tạo user, gán quyền, phân quyền
+B2. Check file pom.xml => Mục đích xem version java là bao nhiêu để cài công cụ => Cài java https://www.rosehosting.com/blog/how-to-install-java-17-lts-on-ubuntu-20-04/?srsltid=AfmBOopk4CUWUVv9p9AHvrpKtstpg6a4g1XNJzyi90R0hre1-heomcRk => Kiểm tra version: java -version
+B3. Cài maven => https://phoenixnap.com/kb/install-maven-on-ubuntu => Kiểm tra version: mvn -version
+B4. Cấu hình database => Tìm source code file application.properties
+B5. Do db là mariadb => Cài mariadb: apt install mariadb-server -y
+- Sửa cấu hình mariadb
+ + systemctl stop mariadb
+ + vi /etc/mysql/mariadb.conf.d/50-server.cnf => Cấu hình bin_address = 0.0.0.0
+ + mysql -u root => show databases; => create database shoeshop; => Tạo database
+ + create user 'shoeshop'@'%' identified by 'shoeshop'; => Tạo user
+ + GRANT ALL PRIVILEGES ON shoeshop.* TO 'shoeshop'@'%'; => Gán quyền
+ + flush privileges; => Lưu lại những thứ đã thay đổi
+ + systemctl restart mariadb
+B6. Đăng nhập vào sql: mysql -h 192.168.158.99 -P 3306 -u admin -p
+B7. use shoeshop; => Chuyển sang db shoeshop
+B8. show tables; => Hiện thị các bảng trong db
+B9. source /home/huynq/projects/shoeshop/shoe_shopdb.sql
+B10. Trở về folder shoeshop => Cài thư viện: mvn install -DskipTests=true
+B11. Chạy dự án: java -jar target/shoe-ShoppingCart-0.0.1-SNAPSHOT.jar ||nohup java -jar target/shoe-ShoppingCart-0.0.1-SNAPSHOT.jar 2>&1 &
+
+=> Muốn kill process => kill -9 process_id
