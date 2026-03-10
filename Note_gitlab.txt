@@ -1,0 +1,12 @@
+- Tạo một server riêng => Tạo snapshot từ server đầu
+- Cài package gitlab server vào link sau: https://packages.gitlab.com/gitlab/gitlab-ee/packages/ubuntu/focal/gitlab-ee_14.4.1-ee.0_amd64.deb
+B1. curl -s https://packages.gitlab.com/install/repositories/gitlab/gitlab-ee/script.deb.sh | sudo bash
+B2. sudo apt-get install gitlab-ee=14.4.1-ee.0
+- Setting server
+* Thêm domain
+B1. vi /etc/hosts => Thêm địa chỉ và domain: 192.168.158.98 gitlab.huynqdevops.vn
+B2. vi /etc/gitlab/gitlab.rb
+    Sửa: external_url 'http://gitlab.example.com' => external_url 'http://gitlab.huynqdevops.vn'
+B3. sudo gitlab-ctl reconfigure => Lưu cấu 
+B4. Truy cập web http://gitlab.huynqdevops.vn
+B5. Tài khoản/password lấy trên server: cat /etc/gitlb/initial_root_password => root / password (trong file) => Đổi password root / Quochuy221003@! - huynq1/1234567890

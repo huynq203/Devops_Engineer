@@ -1,0 +1,74 @@
+- Tư duy triển khai dự án:
+1. Dự án nào có công cụ tương ứng
+2. Chỉ cần lưu ý duy nhất là file cấu hình trong dự án
+3. Triển khai dự án cần đúng 2 bước => B1 là build , B2 là run
+
+Chú ý:
+1. Mỗi dự án sẽ có thư mục riêng
+2. Mỗi dự án sẽ có user riêng
+
+- Các bước triển khai dự án Backend:
+B1. Cài đặt công cụ cần thiết => công cụ
+B2. Xem và sửa file cấu hình => file cấu hình
+B3. Cài đặt và thiết lập database => Cài đặt
+B4. Build dự án => build
+B5. Run dự án => Run
+B6. Kiểm tra hoạt động => Check
+* Build dự án
+1. Build Dự án Nodejs
+- Cài nodejs và npm: sudo apt install nodejs npm -y
+- Nâp cấp Phiên bản node lên 18: curl -s https://deb.nodesource.com/setup_18.x | sudo bash
+	=> Sau đó cài lại npm apt install nodejs -y
+- Tạo user: adduser todolist
+- Phân quyền chủ sỡ hữu và nhóm sở hữu: chmod -R 777 /projects/todolist/dist/
+- Tạo file todolist.conf ở /etc/nginx/conf.d/
+server{
+ listen 8081;
+ root /home/huynq/projects/todolist/dist/;
+ index index.html;
+ try_files $uri $uri/ /index.html;
+}
+- Kiểm tra kết nối: nginx -t
+- Restart nginx: systemctl restart nginx
+- Thêm user vào nhóm sở hữu: usermod -aG todolist www-data
+- Restart nginx: systemctl restart nginx
+- Kiểm tra log: sudo tail -f /var/log/nginx/error.log
+- Tìm kiếm dữ liệu file: sudo nginx -T | grep -n "listen 8081"
+
+2. Buid dự án FrontEnd-ReactJS
+Cách khác:
+Triển khai project vision
+B1. Copy project, giải nén, tạo user, gán quyền, phân quyền
+B2. Tạo file vision.service: vi /lib/systemd/system/vision.service
+[Service]
+Type=simple
+User=vision
+Restart=on-failure
+WorkingDirectory=/home/ec2-huynq1/projects/vision/
+ExecStart=npm run start -- --port=3000
+B3. systemctl daemon-reload : Restart lại service vừa thay đổi file
+B4. systemctl start vision: Khởi động service vision
+B5. systemctl status vision
+
+3. Build dự án Java-Springboot Project
+B1. Copy project, giải nén, tạo user, gán quyền, phân quyền
+B2. Check file pom.xml => Mục đích xem version java là bao nhiêu để cài công cụ => Cài java https://www.rosehosting.com/blog/how-to-install-java-17-lts-on-ubuntu-20-04/?srsltid=AfmBOopk4CUWUVv9p9AHvrpKtstpg6a4g1XNJzyi90R0hre1-heomcRk => Kiểm tra version: java -version
+B3. Cài maven => https://phoenixnap.com/kb/install-maven-on-ubuntu => Kiểm tra version: mvn -version
+B4. Cấu hình database => Tìm source code file application.properties
+B5. Do db là mariadb => Cài mariadb: apt install mariadb-server -y
+- Sửa cấu hình mariadb
+ + systemctl stop mariadb
+ + vi /etc/mysql/mariadb.conf.d/50-server.cnf => Cấu hình bin_address = 0.0.0.0
+ + mysql -u root => show databases; => create database shoeshop; => Tạo database
+ + create user 'shoeshop'@'%' identified by 'shoeshop'; => Tạo user
+ + GRANT ALL PRIVILEGES ON shoeshop.* TO 'shoeshop'@'%'; => Gán quyền
+ + flush privileges; => Lưu lại những thứ đã thay đổi
+ + systemctl restart mariadb
+B6. Đăng nhập vào sql: mysql -h 192.168.158.99 -P 3306 -u admin -p
+B7. use shoeshop; => Chuyển sang db shoeshop
+B8. show tables; => Hiện thị các bảng trong db
+B9. source /home/huynq/projects/shoeshop/shoe_shopdb.sql
+B10. Trở về folder shoeshop => Cài thư viện: mvn install -DskipTests=true
+B11. Chạy dự án: java -jar target/shoe-ShoppingCart-0.0.1-SNAPSHOT.jar ||nohup java -jar target/shoe-ShoppingCart-0.0.1-SNAPSHOT.jar 2>&1 &
+
+=> Muốn kill process => kill -9 process_id
