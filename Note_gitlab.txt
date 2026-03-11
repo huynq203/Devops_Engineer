@@ -16,11 +16,11 @@ B5. Tài khoản/password lấy trên server: cat /etc/gitlb/initial_root_passwo
 - Cấu trúc commit chuẩn: <type>(scope): <description>
 vd: feat(auth): add login with Google
 - Các type phổ biến
-feat - Thêm feature mới
-fix - sửa bug
+feat - Thêm feature mới => Dùng khi thêm api, function,...
+fix - sửa bug => Dùng khi sửa lỗi
 docs -  thay đổi tài liệu
 style - format code (không ảnh hưởng logic)
-refactor - refactor code
+refactor - refactor code => tái cấu trúc code
 test - thêm hoặc sửa test
 chore - công việc phụ (build,config)
 perf - cải thiện perormance
