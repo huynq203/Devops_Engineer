@@ -19,6 +19,7 @@ vd: feat(auth): add login with Google
 feat - Thêm feature mới => Dùng khi thêm api, function,...
 fix - sửa bug => Dùng khi sửa lỗi
 docs -  thay đổi tài liệu
+config - thay đổi file cấu hình
 style - format code (không ảnh hưởng logic)
 refactor - refactor code => tái cấu trúc code
 test - thêm hoặc sửa test
