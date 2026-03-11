@@ -1,2 +1,7 @@
+Máy cá nhân:
 ec2-server: 192.168.158.99 => huynq/123456
-gitlab-server: 192.168.158.99 => huynq/123456
+gitlab-server: 192.168.158.98 => huynq/123456
+
+Máy công ty:
+ec2-server: 192.168.109.99 => ec2-huynq1/123456
+gitlab-server 192.168.109.98 => ec2-huynq1/123456

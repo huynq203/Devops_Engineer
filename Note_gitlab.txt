@@ -8,5 +8,6 @@ B1. vi /etc/hosts => Thêm địa chỉ và domain: 192.168.158.98 gitlab.huynqd
 B2. vi /etc/gitlab/gitlab.rb
     Sửa: external_url 'http://gitlab.example.com' => external_url 'http://gitlab.huynqdevops.vn'
 B3. sudo gitlab-ctl reconfigure => Lưu cấu 
+B4. Cập nhật file hosts trên laptop cá nhân C:\Windows\System32\drivers\etc\hosts: 192.168.158.98 gitlab.huynqdevops.vn
 B4. Truy cập web http://gitlab.huynqdevops.vn
 B5. Tài khoản/password lấy trên server: cat /etc/gitlb/initial_root_password => root / password (trong file) => Đổi password root / Quochuy221003@! - huynq1/1234567890

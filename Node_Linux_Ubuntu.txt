@@ -93,7 +93,7 @@ df -h: Kiểm tra trạng thái disk
 top: Hiển thị toàn bộ thông tin RAM, DISK
 hostnamectl set-hostname + Hostname_new || vi /etc/hostname: Đổi tên server => Khởi động lại server
 reboot: Khởi động lại server
-netsat -tlpun: 
+netstat -tlpun: 
 	+ -t : Hiển thị thông tin TCP
 	+ -l : Hiển thị các cổng đang mở để kết nối
 	+ -p : Hiển thị process
