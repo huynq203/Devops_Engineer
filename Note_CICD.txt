@@ -1,0 +1,41 @@
+** Build CICD bằng gitlab-runner
+* Cài gitlab-runner => server muốn deploy
+B1. apt-get update
+B2. curl -L "https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.deb.sh" | bash
+B3. apt-get install gitlab-runner
+B4. gitlab-runner -v :Kiểm tra version
+
+* Các bước triển khai CICD
+B1. Chọn nhánh cần kết nối, Lên gitlab project => Vào setting => Vào CICD => Chọn Runner => Expland
+=> Ta thấy Register the runner with this URL: http://gitlab.huynqdevops.vn/ và token iLs9h8foYuoeHz7L8AxY
+B2. Lên server chứa project
+ - gitlab-runner register
+ - Điền url register và token
+ - description và tag điền giống tên server
+ - executor có 3 chính: shell, docker, kubernetes => Newbie chọn shell
+B3. Vào file: vi /etc/gitlab-runner/config.toml => concurrent = 1 // Có thể chạy đồng thời bao nhiêu dự án
+B4. Khởi động gitlab-runner
+nohup gitlab-runner run --working-directory /home/gitlab-runner/ --config /etc/gitlab-runner/config.toml --service gitlab-runner --user gitlab-runner 2>&1 &
+B5. Vào CI/CD Settings của gilab kiểm tra 
+ - Phần Available specific runners chọn Edit bỏ tích chọn When a runner is locked, it cannot be assigned to other projects
+
+=> Hoàn thành cấu hình
+
+* Viết kịch bản
+B1. Tạo file .gitlab-ci.yml
+stages:
+    - build
+    - deploy
+    - checklog
+build:
+    stage: build
+    script:
+        - whoami
+        - pwd
+        - ls
+    tags: ec2-server
+B2. Vào CICD -> pipeline để check build oke chưa
+B3. Lên server kiểm tra: cd /home/gitlab-runner/builds/cp-eFsDZL/0/shoeshop/shoeshop
+B4. Tạo file: touch sample.txt
+      
+

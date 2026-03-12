@@ -71,11 +71,11 @@ echo "DevOps2" >> file_name: Hiển thị nội dung DevOps và ghi thêm dòng 
 cat file_name: Đọc nội dung trong file_name
 history: Nội dung câu lệnh đã từng gõ
 
-* Tìm kiếm bằng tail
+* Tìm kiếm xem phần cuối của file:
 tail -n 1 file_name: Hiển thị 1 dòng cuối cùng của file_name
 tail -f file_name: Xem dữ liệu realtime => Thoát khỏi Ctrl+C
 
-* Tìm kiếm từ khóa ở file
+* Tìm kiếm từ khóa ở file:
 grep keyword file_name: Tìm kiếm keyword trong file_name
 grep keyword *.log: Tìm kiếm keyword nhiều file có đuôi .log
 grep -i keyword file_name: Tìm kiếm không phân biệt chữ Hoa/thường
@@ -83,7 +83,7 @@ grep -n keyword file_name: Hiển thị vị trí số dòng keyword đứng dò
 grep -c keyword file_name: Đếm số từ có từ keyword
 grep -E "keyword1,keyword2" filename: Tìm dòng chứa keyword1 hoặc keyword2 (tìm nhiều từ)
 
-* Tìm kiếm file/folder:
+* Tìm kiếm tên file/folder trong hệ thống:
 find . -name "file_name" : Tìm thư mục hiện tại có tên là file_name
 find . -iname "file_name" : Tìm thư mục hiện tại có tên là file_name (Không pb hoa/thường)
 
