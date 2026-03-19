@@ -1,7 +1,7 @@
 * Cấu hình Mạng Brigde => Nên dùng cho PC
 IP động: 192.168.1.17/24
 Cấu hình IP tĩnh
-Set IP tĩnh: nano /etc/netplan/
+Set IP tĩnh: nano /etc/netplan/00-installer-config.yaml
 
 file sửa thành:network:
 	ethernets:
@@ -19,7 +19,7 @@ ip -4 addr: kiểm tra địa chỉ ip
 * Cấu hình Mạng NAT => Nên dùng cho laptop
 IP động: 192.168.158.128/24
 Cấu hình IP tĩnh
-Set IP tĩnh: nano /etc/netplan/		
+Set IP tĩnh: nano /etc/netplan/00-installer-config.yaml		
 network:
 	ethernets:
 		ens33:
