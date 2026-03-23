@@ -24,11 +24,28 @@ network:
 	ethernets:
 		ens33:
 			dhcp4: false
-			addresses: [192.168.158.99/24] // Đặt tùy ý đối với bridge
+			addresses: [192.168.158.99/24] // Đặt tùy ý đối với NAT
 			gateway4: 192.168.158.2
 			nameservers:
 			  addresses: [8.8.8.8,8.8.4.4]
 version: 2		
+Hoặc sửa như sau:
+network:
+	ethernets:
+		ens33:
+			dhcp4: false
+			addresses: 
+			 - 192.168.158.99/24 // Đặt tùy ý đối với NAT
+			gateway4: 192.168.158.2
+			nameservers:
+			  addresses:
+			   - 8.8.8.8
+			   - 8.8.4.4
+version: 2
+
+* ssh vào server
+ssh username@ip_server
+Nếu cảnh báo bảo mật thì gen lại ssh key: ssh-keygen -R ip_servers
 
 - Các câu lệnh linux
 pwd: vị trí hiện tại
@@ -58,6 +75,7 @@ rm -rf name_folde || name_file: Xóa folder hoặc file không cần hỏi lại
 * Copy file
 cp file_1 url: Copy file_1 vào url
 cp -r folder_1 url: Copy folder vào url
+scp file/folder (cần copy) username@ip_server:/url : Copy file/folder từ local sang server vào đường dẫn url
 
 * Move file hoặc folder
 mv file_1 file: Chuyển file_1 sang thư mục hiện tại và đổi tên thành file
@@ -153,7 +171,7 @@ sudo apt upgrade: nâng cấp các package đang cài
 	+ :q! => Enter => Thoát không lưu
 	+ :w => Enter => Chỉ lưu không thoát
 	+ :wq || :x => Enter => Lưu và thoát
-scp file/folder (cần copy) username@ip_server:/url : Copy file/folder từ local sang server vào đường dẫn url
+
 
 * Cài NGINX:
 - Cài nginx: sudo apt install nginx -y => được lưu trong /etc/nginx

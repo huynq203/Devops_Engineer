@@ -34,7 +34,7 @@ server{
 - Restart nginx: systemctl restart nginx
 - Kiểm tra log: sudo tail -f /var/log/nginx/error.log
 - Tìm kiếm dữ liệu file: sudo nginx -T | grep -n "listen 8081"
-
+------------------------------------------------------------------------------------------------------------------
 2. Buid dự án FrontEnd-ReactJS
 Cách khác:
 Triển khai project vision
@@ -49,7 +49,7 @@ ExecStart=npm run start -- --port=3000
 B3. systemctl daemon-reload : Restart lại service vừa thay đổi file
 B4. systemctl start vision: Khởi động service vision
 B5. systemctl status vision
-
+------------------------------------------------------------------------------------------------------------------
 3. Build dự án Java-Springboot Project
 B1. Copy project, giải nén, tạo user, gán quyền, phân quyền
 B2. Check file pom.xml => Mục đích xem version java là bao nhiêu để cài công cụ => Cài java https://www.rosehosting.com/blog/how-to-install-java-17-lts-on-ubuntu-20-04/?srsltid=AfmBOopk4CUWUVv9p9AHvrpKtstpg6a4g1XNJzyi90R0hre1-heomcRk => Kiểm tra version: java -version
@@ -61,7 +61,7 @@ B5. Do db là mariadb => Cài mariadb: apt install mariadb-server -y
  + vi /etc/mysql/mariadb.conf.d/50-server.cnf => Cấu hình bin_address = 0.0.0.0
  + mysql -u root => show databases; => create database shoeshop; => Tạo database
  + create user 'shoeshop'@'%' identified by 'shoeshop'; => Tạo user
- + GRANT ALL PRIVILEGES ON shoeshop.* TO 'shoeshop'@'%'; => Gán quyền
+ + GRANT ALL PRIVILEGES ON shoeshop.* TO 'shoeshop'@'%'; => Gán full quyền
  + flush privileges; => Lưu lại những thứ đã thay đổi
  + systemctl restart mariadb
 B6. Đăng nhập vào sql: mysql -h 192.168.158.99 -P 3306 -u admin -p
