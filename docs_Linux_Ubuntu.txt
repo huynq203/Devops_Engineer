@@ -117,11 +117,16 @@ netstat -tlpun:
 	+ -p : Hiển thị process
 	+ -u : Hiển thị thông tin các kết nối UDP
 	+ -n : Hiển thị địa chỉ IP và cổng dạng số
+
+** process system
 ps -ef: Các process đang chạy trên hệ thống
+ps -ef | grep keyword | grep -v grep | awk '{print $2}' => Hiện thị pid
 traceroute -T -p Port DiaChiIP: Hiển thị thông tin kết nối
 	+ -T : TCP
 	+ -p: Port
-	
+lsof -i :port => Kiểm tra process nào đang chạy port
+kill -9 pid: Xóa process
+kill -9 $(ps -ef | grep keyword | grep -v grep | awk '{print $2}')
 * Tạo user
 useradd: Thêm user k điền thông tin và mật khẩu => thường sẽ vào thẳng luôn server
 adduser: Thêm user cần điền thông tin và mật khẩu => Muốn vào thì cần mật khẩu
@@ -182,3 +187,11 @@ sudo apt upgrade: nâng cấp các package đang cài
 nginx -t: Để test xem vấn đề gì khai
 systemctl restart nginx: Restart lại nginx
 nginx -s reload: Chỉ restart lại nginx những dự án thay đổi
+
+** Câu lệnh cập nhật thư viện
+sudo apt-get update
+sudo apt-get upgrade
+
+** Câu lệnh xóa thư viện không còn dùng
+sudo apt autoremove
+

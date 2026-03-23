@@ -16,8 +16,9 @@ B2. Lên server chứa project
 B3. Vào file: vi /etc/gitlab-runner/config.toml => concurrent = 1 // Có thể chạy đồng thời bao nhiêu dự án
 B4. Khởi động gitlab-runner
 nohup gitlab-runner run --working-directory /home/gitlab-runner/ --config /etc/gitlab-runner/config.toml --service gitlab-runner --user gitlab-runner 2>&1 &
+=> Kiểm tra service chạy: ps -ef | grep gitlab-runner
 B5. Vào CI/CD Settings của gilab kiểm tra 
- - Phần Available specific runners chọn Edit bỏ tích chọn When a runner is locked, it cannot be assigned to other projects
+ - Phần Available specific runners => chọn Edit => bỏ tích chọn When a runner is locked, it cannot be assigned to other projects
 
 => Hoàn thành cấu hình
 
@@ -30,12 +31,62 @@ stages:
 build:
     stage: build
     script:
-        - whoami
-        - pwd
-        - ls
-    tags: ec2-server
+        - mvn install -DskipTests=true
+    tags:
+        - ec2-server
 B2. Vào CICD -> pipeline để check build oke chưa
 B3. Lên server kiểm tra: cd /home/gitlab-runner/builds/cp-eFsDZL/0/shoeshop/shoeshop
-B4. Tạo file: touch sample.txt
+B4. Tạo folder: mkdir datas/shoeshop
+* Lưu ý: trong dự án không chạy trực tiếp username gitlab-runner mà sẽ chạy username dự án
+B5. Cấu hình cho gitlab-runner sử dụng sudo mà không cần password
+    - visudo
+    - Thêm 3 dòng sau root:
+        + gitlab-runner ALL=(ALL) NOPASSWD: /bin/cp* => Phân quyền copy cho username gitlab-runner mà không cần password
+        + gitlab-runner ALL=(ALL) NOPASSWD: /bin/chown* => Phân quyền sở hữu cho username gitlab-runner mà không cần password
+        + gitlab-runner ALL=(ALL) NOPASSWD: /bin/su shoeshop* => Phân quyền chuyển user shoeshope cho username gitlab-runner mà không cần password
+B6. Sửa lại file .gitlab-ci.yml trên gitlab
+variables:
+    projectname: shoe-ShoppingCart
+    version: 0.0.1-SNAPSHOT
+    projectuser: shoeshop
+    projectpath: /datas/$projectuser/
+stages:
+    - build
+    - deploy
+    - showlog
+build:
+    stage: build
+    variables:
+        GIT_STRATEGY: clone
+    script:
+        - mvn install -DskipTests=true
+    tags:
+        - ec2-server
+    only:
+        -tags
+deploy:
+    stage: deploy
+    variables:
+        GIT_STRATEGY: none
+    script:
+        - sudo cp target/$projectname-$version.jar $projectpath
+        - sudo chown -R $projectuser. $projectpath
+        - sudo su $projectuser -c "kill -9 $(ps -ef | grep $projectname-$version.jar | grep -v grep | awk '{print $2}')"
+        - sudo su $projectuser -c "cd $projectpath; nohup java -jar target/$projectname-$version.jar > nohup.out 2>&1 &"
+    tags:
+        - ec2-server
+    only:
+        -tags
+showlog:
+    stage: showlog
+    variables:
+        GIT_STRATEGY: none
+    script:
+        - sleep 20
+        - sudo su $projectuser -c "cd $projectpath; tail -n 1000 nohup.out"
+    tags:
+        - ec2-server
+    only:
+        -tags
       
 

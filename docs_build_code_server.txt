@@ -19,6 +19,8 @@ B6. Kiểm tra hoạt động => Check
 - Cài nodejs và npm: sudo apt install nodejs npm -y
 - Nâp cấp Phiên bản node lên 18: curl -s https://deb.nodesource.com/setup_18.x | sudo bash
 	=> Sau đó cài lại npm apt install nodejs -y
+- Cài thư viện dự án: npm i
+- Build dự án: npm run build
 - Tạo user: adduser todolist
 - Phân quyền chủ sỡ hữu và nhóm sở hữu: chmod -R 777 /projects/todolist/dist/
 - Tạo file todolist.conf ở /etc/nginx/conf.d/
@@ -52,9 +54,18 @@ B5. systemctl status vision
 ------------------------------------------------------------------------------------------------------------------
 3. Build dự án Java-Springboot Project
 B1. Copy project, giải nén, tạo user, gán quyền, phân quyền
-B2. Check file pom.xml => Mục đích xem version java là bao nhiêu để cài công cụ => Cài java https://www.rosehosting.com/blog/how-to-install-java-17-lts-on-ubuntu-20-04/?srsltid=AfmBOopk4CUWUVv9p9AHvrpKtstpg6a4g1XNJzyi90R0hre1-heomcRk => Kiểm tra version: java -version
-B3. Cài maven => https://phoenixnap.com/kb/install-maven-on-ubuntu => Kiểm tra version: mvn -version
-B4. Cấu hình database => Tìm source code file application.properties
+B2. Check file pom.xml => Mục đích xem version java là bao nhiêu để cài công cụ => Cài java https://www.rosehosting.com/blog/how-to-install-java-17-lts-on-ubuntu-20-04/?srsltid=AfmBOopk4CUWUVv9p9AHvrpKtstpg6a4g1XNJzyi90R0hre1-heomcRk
+	- apt-get update
+	- apt-get upgrade
+	- apt install openjdk-17-jdk openjdk-17-jre
+=> Kiểm tra version: java -version
+B3. Cài maven => https://phoenixnap.com/kb/install-maven-on-ubuntu
+	- apt-get update
+	- apt-get upgrade
+	- apt install maven -y
+ => Kiểm tra version: mvn -version
+** Cài + tạo db
+B4. Cấu hình file database => Tìm source code => file application.properties
 B5. Do db là mariadb => Cài mariadb: apt install mariadb-server -y
 - Sửa cấu hình mariadb
  + systemctl stop mariadb
@@ -67,7 +78,10 @@ B5. Do db là mariadb => Cài mariadb: apt install mariadb-server -y
 B6. Đăng nhập vào sql: mysql -h 192.168.158.99 -P 3306 -u admin -p
 B7. use shoeshop; => Chuyển sang db shoeshop
 B8. show tables; => Hiện thị các bảng trong db
-B9. source /home/huynq/projects/shoeshop/shoe_shopdb.sql
+B9. source /home/huynq/projects/shoeshop/shoe_shopdb.sql => import dữ liệu vào db
+
+** Cấu hình db, port, username, password vào file application.properties
+** Cài thư viện mvn
 B10. Trở về folder shoeshop => Cài thư viện: mvn install -DskipTests=true
 B11. Chạy dự án: java -jar target/shoe-ShoppingCart-0.0.1-SNAPSHOT.jar ||nohup java -jar target/shoe-ShoppingCart-0.0.1-SNAPSHOT.jar 2>&1 &
 

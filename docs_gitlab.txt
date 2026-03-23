@@ -12,6 +12,10 @@ B4. Cập nhật file hosts trên laptop cá nhân C:\Windows\System32\drivers\e
 B4. Truy cập web http://gitlab.huynqdevops.vn
 B5. Tài khoản/password lấy trên server: cat /etc/gitlb/initial_root_password => root / password (trong file) => Đổi password root / Quochuy221003@! - huynq1/1234567890
 
+** Câu lệnh gitlab
+gitlab-ctl status: Kiểm tra trạng thái gitlab
+gitlab-ctl restart: Restart lại service gitlab
+
 * Git commit conventional
 - Cấu trúc commit chuẩn: <type>(scope): <description>
 vd: feat(auth): add login with Google
