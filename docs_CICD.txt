@@ -68,11 +68,17 @@ deploy:
     stage: deploy
     variables:
         GIT_STRATEGY: none
+    when: manual
     script:
-        - sudo cp target/$projectname-$version.jar $projectpath
-        - sudo chown -R $projectuser. $projectpath
-        - sudo su $projectuser -c "kill -9 $(ps -ef | grep $projectname-$version.jar | grep -v grep | awk '{print $2}')"
-        - sudo su $projectuser -c "cd $projectpath; nohup java -jar target/$projectname-$version.jar > nohup.out 2>&1 &"
+        if("$GITLAB_USER_LOGIN"=='huynq1'); then
+            sudo cp target/$projectname-$version.jar $projectpath
+            sudo chown -R $projectuser. $projectpath
+            sudo kill -9 $(ps -ef | grep $projectname-$version.jar | grep -v grep | awk '{print $2}')
+            sudo su $projectuser -c "cd $projectpath; nohup java -jar target/$projectname-$version.jar > nohup.out 2>&1 &"
+        else
+            echo "Permision denined"
+            exit 1
+        fi
     tags:
         - ec2-server
     only:
@@ -81,6 +87,7 @@ showlog:
     stage: showlog
     variables:
         GIT_STRATEGY: none
+    when: manual
     script:
         - sleep 20
         - sudo su $projectuser -c "cd $projectpath; tail -n 1000 nohup.out"
@@ -89,4 +96,4 @@ showlog:
     only:
         - tags
       
-
+Các variables gitlab ci: gitlab ci variables list

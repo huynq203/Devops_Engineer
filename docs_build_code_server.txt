@@ -83,6 +83,6 @@ B9. source /home/huynq/projects/shoeshop/shoe_shopdb.sql => import dữ liệu v
 ** Cấu hình db, port, username, password vào file application.properties
 ** Cài thư viện mvn
 B10. Trở về folder shoeshop => Cài thư viện: mvn install -DskipTests=true
-B11. Chạy dự án: java -jar target/shoe-ShoppingCart-0.0.1-SNAPSHOT.jar ||nohup java -jar target/shoe-ShoppingCart-0.0.1-SNAPSHOT.jar 2>&1 &
+B11. Chạy dự án: java -jar target/shoe-ShoppingCart-0.0.1-SNAPSHOT.jar hoặc nohup java -jar target/shoe-ShoppingCart-0.0.1-SNAPSHOT.jar 2>&1 &
 
 => Muốn kill process => kill -9 process_id
