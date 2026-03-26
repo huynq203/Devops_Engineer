@@ -1,4 +1,19 @@
-B2. Tạo folder tools
+* Các câu lệnh docker
+docker ps || docker ps -a : Hiển thị các container
+docker images: Hiển thị các images
+docker rm -f container_id || container_name: Xóa container container_id || container_name
+docker rm -f $(docker ps -a): Xóa toàn bộ docker có trên server
+docker rmi -f images_id || images_name
+docker start container_id: Chạy docker
+docker stop container_id: Dừng docker
+
+docker system df : Kiểm tra trước khi dọn
+docker system prune -a: Xóa các container không dùng
+docker builder prune -a: Xóa các cache build
+sudo truncate -s 0 /var/lib/docker/containers/*/*.log : dọn log
+
+
+B1. Tạo folder tools
 B2. Tạo folder docker
 B3. Ghi file vi install-docker.sh:
 #!/bin/bash
@@ -23,3 +38,49 @@ B5. docker pull ubuntu:22.04
 B6. Truy cập vào môi trường: docker run --name ubuntu -it ubuntu:22.04 => chỉ dùng 1 lần để khởi động 
 Muốn truy cập vào lại môi trường: docker exec -it ubuntu bash
 B7. Chạy webserver nginx: docker run --name nginx -dp 9999:80 nginx
+=> Cấu hình trên aws mở port 9999 => http://18.143.40.118:9999/
+B8. Chạy test: docker run --name car-serv -dp 8888:80 elroydevops/car-serv
+
+** Keyword trong Dockerfile
+FROM node:20 : kéo version nodejs về server
+WORKDIR : chỉ định thư việc làm việc cho container
+COPY : copy source code vào container || COPY . . : dấu chấm đầu tiên vị trí hiện tại source code - dấu chấm thứ 2 vị trị hiện tại của container(tức là vị trí WORKDIR)
+RUN : Chạy câu lệnh
+ENV : Khai báo biến môi trường
+EXPOSE: Định nghĩa container chạy port nào => EXPOSE 80 : port server EXPOSE và port container là 80 => VD 7777:80 lúc chạy container
+CMD : Xác định lệnh và giá trị mặc định
+ENTRYPOINT: giữ nguyên 1 lệnh cố định và cho phép lệnh được chỉ định khi chạy container vào cuối
+
+** Tư duy viết Dockerfile tối ưu
+- Chọn images đúng version dự án:
+    + Chọn images đúng version dự án
+    + Chọn images từ các nguồn official, verified, 
+    + Chọn base image là alpine => giúp cấu hình nhẹ hơn
+
+*** Build dự án Backend
+
+B1. Tạo file Dockerfile ở project: vi Dockerfile
+B2. Điền thông tin sau:
+
+## build stage ##
+FROM maven:3.9.9-eclipse-temurin-8 as build
+
+WORKDIR /app
+
+COPY . .
+
+RUN mvn install -DskipTests=true
+
+## run stage ##
+
+FROM amazoncorretto:8u402-alpine-jre
+
+WORKDIR /run
+
+COPY --from=build /app/target/*.jar /run/shoe-ShoppingCart-0.0.1-SNAPSHOT.jar
+
+EXPOSE 7777
+
+ENTRYPOINT java -jar shoe-ShoppingCart-0.0.1-SNAPSHOT.jar
+
+B3. chạy container: docker run --name shoeshop -dp 7777:7777 shoeshop:v1

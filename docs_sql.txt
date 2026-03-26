@@ -1,0 +1,10 @@
+** Câu lệnh sql => Mysql
+- Tạo username
+CREATE USER 'username'@'ip_server' identified 'password'
+- Xóa username
+DROP USER 'username'@'ip_server'
+- Gán quyền username
+    + Gán full quyền: GRANT ALL PRIVILEGES ON db_name.* TO 'username'@'ip_server';
+    + Gán full quyền 1 bảng: GRANT ALL PRIVILEGES ON db_name.table_name TO 'username'@'ip_server';
+    + Gán quyền view full bảng: GRANT VIEW PRIVILEGES ON db_name.* TO 'username'@'ip_server'; => Tương tự CREATE, INSERT, UPDATE, DELETE, DROP, ALTER,...
+    + Thu hồi full quyền: REVOKE ALL PRIVILEGES ON shoeshop.* FROM 'shoeshop'@'%';

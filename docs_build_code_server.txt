@@ -70,6 +70,7 @@ B5. Do db là mariadb => Cài mariadb: apt install mariadb-server -y
 - Sửa cấu hình mariadb
  + systemctl stop mariadb
  + vi /etc/mysql/mariadb.conf.d/50-server.cnf => Cấu hình bin_address = 0.0.0.0
+ + systemctl restart mariadb
  + mysql -u root => show databases; => create database shoeshop; => Tạo database
  + create user 'shoeshop'@'%' identified by 'shoeshop'; => Tạo user
  + GRANT ALL PRIVILEGES ON shoeshop.* TO 'shoeshop'@'%'; => Gán full quyền

@@ -43,6 +43,9 @@ network:
 			   - 8.8.4.4
 version: 2
 
+* Xem thông tin server
+cat /etc/os-release
+
 * ssh vào server
 ssh username@ip_server
 Nếu cảnh báo bảo mật thì gen lại ssh key: ssh-keygen -R ip_servers
@@ -55,11 +58,11 @@ clear: Xóa toàn bộ trên cmd
 
 * Xem thông tin file/folder
 ls: Show toàn bộ file trong folder
-ls -l: Show theo list
+ls -l: Show theo list các folder/file con
 ls -a: Show những file ẩn
 ls -t: Show những file từ mới nhất đến cũ nhất
 ls -lta: Show toàn bộ file trong folder
-
+ls -ld: Show folder hiện tại
 * Tạo folder
 mkdir name_folder: Tạo folder name_folder
 mkdir -p name_folder1/namefolder2: Tạo name_folder1 và name_folder2
