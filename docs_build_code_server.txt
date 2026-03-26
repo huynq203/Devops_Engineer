@@ -31,7 +31,7 @@ server{
  try_files $uri $uri/ /index.html;
 }
 - Kiểm tra kết nối: nginx -t
-- Restart nginx: systemctl restart nginx
+- Restart nginx: systemctl restart nginx => nêm sử dụng reload: systemctl reload nginx
 - Thêm user vào nhóm sở hữu: usermod -aG todolist www-data
 - Restart nginx: systemctl restart nginx
 - Kiểm tra log: sudo tail -f /var/log/nginx/error.log

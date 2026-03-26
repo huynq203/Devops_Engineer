@@ -1,2 +1,5 @@
 * ec2-server
 ssh -i C:\Users\Admin\Downloads\ec2-server.pem ubuntu@18.143.40.118
+
+* Tổng hợp tài liệu aws
+- aws documents
