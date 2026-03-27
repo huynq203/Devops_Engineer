@@ -198,3 +198,13 @@ sudo apt-get upgrade
 ** Câu lệnh xóa thư viện không còn dùng
 sudo apt autoremove
 
+** Câu lệnh gen ssh key
+B1. Máy local tạo ssh key
+	- Câu lệnh tạo ssh key: ssh-keygen -t ed25519 -C "huynq1@evnfc.vn" => Sẽ có 2 file đuôi id_rsa và id_rsa.public
+B2. Copy file public key lên server
+B3. Copy nội dung file public key vào ~/.ssh/authorized_keys
+B4. Set quyền
+	- chmod 700 ~/.ssh
+	- chomd 600 ~/.ssh/authorized_keys
+B5. ssh từ local lên server
+
