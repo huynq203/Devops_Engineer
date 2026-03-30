@@ -36,7 +36,7 @@ B4. Chạy file docker-install.sh có 3 cách chạy:
     - C3: bash docker-install.sh
 B5. docker pull ubuntu:22.04
 B6. Truy cập vào môi trường: docker run --name ubuntu -it ubuntu:22.04 => chỉ dùng 1 lần để khởi động 
-Muốn truy cập vào lại môi trường: docker exec -it ubuntu bash
+Muốn truy cập vào lại môi trường: docker exec -it container_name bash || docker exec -it container_name sh
 B7. Chạy webserver nginx: docker run --name nginx -dp 9999:80 nginx
 => Cấu hình trên aws mở port 9999 => http://18.143.40.118:9999/
 B8. Chạy test: docker run --name car-serv -dp 8888:80 elroydevops/car-serv
@@ -58,10 +58,9 @@ ENTRYPOINT: giữ nguyên 1 lệnh cố định và cho phép lệnh được ch
     + Chọn base image là alpine => giúp cấu hình nhẹ hơn
 
 *** Build dự án Backend
-
+**Cách 1:
 B1. Tạo file Dockerfile ở project: vi Dockerfile
 B2. Điền thông tin sau:
-
 ## build stage ##
 FROM maven:3.9.9-eclipse-temurin-8 as build
 
@@ -79,8 +78,66 @@ WORKDIR /run
 
 COPY --from=build /app/target/*.jar /run/shoe-ShoppingCart-0.0.1-SNAPSHOT.jar
 
-EXPOSE 7777
+EXPOSE 80
 
 ENTRYPOINT java -jar shoe-ShoppingCart-0.0.1-SNAPSHOT.jar
 
-B3. chạy container: docker run --name shoeshop -dp 7777:7777 shoeshop:v1
+B3. chạy container: docker run --name shoeshop -dp 8888:80 shoeshop:v1
+
+**Cách 2:
+B1. Copy file Dockerfile: cp Dockerfile Dockerfile-v2
+B2. Sửa file Dockerfile-v2: vi Dockerfile-v2
+## build stage ##
+FROM maven:3.9.9-eclipse-temurin-8 as build
+
+WORKDIR /app
+
+COPY . .
+
+RUN mvn install -DskipTests=true
+
+## run stage ##
+
+FROM alpine:3.19
+
+RUN apk update && apk add openjdk8
+
+WORKDIR /run
+
+COPY --from=build /app/target/*.jar /run/shoe-ShoppingCart-0.0.1-SNAPSHOT.jar
+
+EXPOSE 80
+
+ENTRYPOINT java -jar shoe-ShoppingCart-0.0.1-SNAPSHOT.jar
+
+**Cách 3: Sử dụng user khác chạy dự án
+B1. Copy file Dockerfile: cp Dockerfile Dockerfile-v3
+B2. Sửa lại file Dockerfile-v3: vi Dockerfile-v3
+## build stage ##
+FROM maven:3.9.9-eclipse-temurin-8 as build
+
+WORKDIR /app
+
+COPY . .
+
+RUN mvn install -DskipTests=true
+
+## run stage ##
+
+FROM alpine:3.19
+
+RUN adduser -D shoeshop
+
+RUN apk update && apk add openjdk8
+
+WORKDIR /run
+
+COPY --from=build /app/target/*.jar /run/shoe-ShoppingCart-0.0.1-SNAPSHOT.jar
+
+RUN chown -R shoeshop:shoeshop /run
+
+USER shoeshop
+
+EXPOSE 80
+
+ENTRYPOINT java -jar shoe-ShoppingCart-0.0.1-SNAPSHOT.jar
