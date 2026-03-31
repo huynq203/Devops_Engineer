@@ -8,11 +8,11 @@ docker start container_id: Chạy docker
 docker stop container_id: Dừng docker
 
 docker system df : Kiểm tra trước khi dọn
-docker system prune -a: Xóa các container không dùng
-docker builder prune -a: Xóa các cache build
+docker system prune -af: Xóa các container không dùng
+docker builder prune -af: Xóa các cache build
 sudo truncate -s 0 /var/lib/docker/containers/*/*.log : dọn log
 
-
+=======================Cài docker=======================
 B1. Tạo folder tools
 B2. Tạo folder docker
 B3. Ghi file vi install-docker.sh:
@@ -29,11 +29,11 @@ sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-
 sudo chmod +x /usr/local/bin/docker-compose
 docker --version
 docker-compose --version
-
 B4. Chạy file docker-install.sh có 3 cách chạy:
     - C1: ./docker-install.sh
     - C2: sh docker-install.sh
     - C3: bash docker-install.sh
+=======================Pull docker ubuntu=======================
 B5. docker pull ubuntu:22.04
 B6. Truy cập vào môi trường: docker run --name ubuntu -it ubuntu:22.04 => chỉ dùng 1 lần để khởi động 
 Muốn truy cập vào lại môi trường: docker exec -it container_name bash || docker exec -it container_name sh
@@ -57,6 +57,7 @@ ENTRYPOINT: giữ nguyên 1 lệnh cố định và cho phép lệnh được ch
     + Chọn images từ các nguồn official, verified, 
     + Chọn base image là alpine => giúp cấu hình nhẹ hơn
 
+=======================Start build dự án backend=======================
 *** Build dự án Backend
 **Cách 1:
 B1. Tạo file Dockerfile ở project: vi Dockerfile
@@ -141,3 +142,28 @@ USER shoeshop
 EXPOSE 80
 
 ENTRYPOINT java -jar shoe-ShoppingCart-0.0.1-SNAPSHOT.jar
+
+=======================Done build backend=======================
+
+=======================Start build frontend=======================
+B1. cp project todolist vào server: scp -i C:\Users\Admin\Downloads\ec2-server.pem F:\DevOps_Trainning\Docs_Devops\Project\todolist.zip ubuntu@18.141.224.15:/home/ubuntu
+B2. move project về root: mv /home/ubuntu/todolist.zip /data/
+B3. Giải nén todolist.zip: unzip todolist.zip
+B4. Vào project todolist và tạo file Dockerfile: vi Dockerfile
+## build stage ##
+FROM node:18.18-alpine as build
+
+WORKDIR /app
+
+COPY . .
+
+RUN npm install
+
+RUN npm run build
+
+## run stage ##
+FROM nginx:alpine
+## Copy folder build vào thư mục mặc định của nginx
+COPY --from=build /app/dist /usr/share/nginx/html
+
+CMD ["nginx","-g","daemon off;"]
