@@ -130,6 +130,7 @@ traceroute -T -p Port DiaChiIP: Hiển thị thông tin kết nối
 lsof -i :port => Kiểm tra process nào đang chạy port
 kill -9 pid: Xóa process
 kill -9 $(ps -ef | grep keyword | grep -v grep | awk '{print $2}')
+
 * Tạo user
 useradd: Thêm user k điền thông tin và mật khẩu => thường sẽ vào thẳng luôn server
 adduser: Thêm user cần điền thông tin và mật khẩu => Muốn vào thì cần mật khẩu
@@ -163,7 +164,10 @@ chmod -R 777 folder_name: Phân quyền all
 * Cập nhật package
 sudo apt update: cập nhật danh sách package mới nhất
 sudo apt upgrade: nâng cấp các package đang cài
-* Cài đặt VIM
+
+* Câu lệnh xóa thư viện không còn dùng
+sudo apt autoremove
+=======================Cài đặt VIM=======================
 - Cài đặt VIM - Công cụ trình sửa văn bản: sudo apt install vim -y
 - Tạo file VIM: VI file_name
 - Khi vào file_name: 
@@ -180,7 +184,7 @@ sudo apt upgrade: nâng cấp các package đang cài
 	+ :w => Enter => Chỉ lưu không thoát
 	+ :wq || :x => Enter => Lưu và thoát
 
-
+=======================Cài đặt nginx=======================
 * Cài NGINX:
 - Cài nginx: sudo apt install nginx -y => được lưu trong /etc/nginx
 - Những file cần chú ý nginx:
@@ -190,14 +194,16 @@ sudo apt upgrade: nâng cấp các package đang cài
 nginx -t: Để test xem vấn đề gì khai
 systemctl restart nginx: Restart lại nginx
 nginx -s reload: Chỉ restart lại nginx những dự án thay đổi
-
-** Câu lệnh cập nhật thư viện
-sudo apt-get update
-sudo apt-get upgrade
-
-** Câu lệnh xóa thư viện không còn dùng
-sudo apt autoremove
-
+** Lưu ý khi build xong dự án thì cần cấu hình thêm trong nginx:
+B1. vi /etc/nginx/conf.d/default.conf
+B2. phân location thêm: try_files $uri $uri/ /index.html; => Mục đích để tránh SPA
+location / {
+    root /usr/share/nginx/html;
+    index index.html index.htm;
+    try_files $uri $uri/ /index.html;
+}
+B3. Reload lại nginx: nginx -s reload
+=======================Gen ssh key=======================
 ** Câu lệnh gen ssh key
 B1. Máy local tạo ssh key
 	- Câu lệnh tạo ssh key: ssh-keygen -t ed25519 -C "huynq1@evnfc.vn" => Sẽ có 2 file đuôi id_rsa và id_rsa.public
