@@ -177,21 +177,38 @@ CMD ["nginx","-g","daemon off;"]
 
 * Triển khai đẩy images lên dockerhub
 B1. Trên server: docker login
-B2. Đổi tên images trên server: docker image = domain/project/repo:tag: docker tag todolist:v1 /devopsengineer/todolist:v1
-
-
-
-
-
-
-
-
+B2. Đổi tên images trên server: docker image = domain/project/repo:tag: docker tag todolist:v1 huynq203/todolist:v1
+B3. Đẩy lên dockerhub: docker push huynq203/todolist:v1
+B4. Kéo từ docker hub về: docker pull huynq203/todolist:v1
 
 =======================Các bước cài đặt docker private registry=======================
-# apt get update
-# apt-get install openssl
-# mkdir -p /tools/registry/ && cd /tools/registry
-# mkdir data certs
-# openssl req -newkey rsa:4096 -nodes -sha256 -keyout certs/domain.key -subj "/CN=192.168.1.100" -addext "subjectAltName = DNS:192.168.1.100,IP:192.168.1.100" -x509 -days 365 -out certs/domain.crt
-# vi docker-compose.yml
+B1. Update thư viện: sudo apt-get update
+B2. Cài Openssl: apt-get install openssl => Mục đích để xác thực https
+B3. Tạo key bằng openssl: openssl req -newkey rsa:4096 -nodes -sha256 -keyout certs/domain.key -subj "/CN=47.129.222.142" -addext "subjectAltName = DNS:47.129.222.142,IP:47.129.222.142" -x509 -days 365 -out certs/domain.crt
+B4. vào folder registry: vi docker-compose.yml:
+version: '3'
 
+services:
+  registry:
+    image: registry:2
+    restart: always
+    container_name: registry-server
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./data:/var/lib/registry
+      - ./certs:/certs
+    environment:
+      REGISTRY_HTTP_TLS_CERTIFICATE: /certs/domain.crt
+      REGISTRY_HTTP_TLS_KEY: /certs/domain.key
+
+B5. Chạy server: docker-compose up -d
+B6. Từ folder registry thêm địa chỉ do lỗi không chứng thực => tự chứng thực tự ký: mkdir -p /etc/docker/certs.d/47.129.222.142:5000
+B7. Copy key domain sang folder vừa tạo: cp certs/domain.crt /etc/docker/certs.d/47.129.222.142:5000/ca.crt
+B8. Restart server docker: systemctl restart docker
+B9. Login lại: docker login 47.129.222.142:5000 => Username/password tùy ý do chưa cài xác thực
+B10. Tại server muốn pull docker về cũng phải xác thực https
+    - mkdir -p /etc/docker/certs.d/47.129.222.142:5000
+    - scp certs/domain.crt ubuntu@47.129.222.142:/home/ubuntu
+    - cp /home/ubuntu/domain.crt /etc/docker/certs.d/47.129.222.142:5000/ca.crt
+    - systemctl restart docker
