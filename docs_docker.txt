@@ -30,7 +30,8 @@ sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-
 sudo chmod +x /usr/local/bin/docker-compose
 docker --version
 docker-compose --version
-B4. Chạy file docker-install.sh có 3 cách chạy:
+B4. Cấp quyền file: chmod +x docker-install.sh
+B5. Chạy file docker-install.sh có 3 cách chạy:
     - C1: ./docker-install.sh
     - C2: sh docker-install.sh
     - C3: bash docker-install.sh
@@ -212,3 +213,32 @@ B10. Tại server muốn pull docker về cũng phải xác thực https
     - scp certs/domain.crt ubuntu@47.129.222.142:/home/ubuntu
     - cp /home/ubuntu/domain.crt /etc/docker/certs.d/47.129.222.142:5000/ca.crt
     - systemctl restart docker
+
+=============================Các thành phần chính docker ========================================
+#Docker volumes: nơi Docker dùng để lưu dữ liệu bền vững cho container.
+Ví dụ:
+- Có 1 docker mysql trên server
+- giờ mount volumes 1 docker: 
+mkdir -p /db/mariadb-1
+docker run -v /db/mariadb-1:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=root -p 3307:3306 --name mariadb-1 -d mariadb:10.6
+#Docker compose
+- Tiếp tục dự án Build dự án Backend
+B1. Tạo file docker-compose.yml: vi docker-compose.yml
+version: '3.8'  # theo docker engineer releases
+services:
+  db1:
+    image: mariadb:10.6
+    volumes:
+      - /db/mariadb-1:var/lib/mysql # mount dữ liệu từ container ra server
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3307:3306"
+    container_name: mariadb-1
+    restart: always  # mục đích khi server lỗi, khi restart server thì những service tự động restart
+
+
+
+
+
+Docker network
