@@ -4,13 +4,13 @@ B1. curl -s https://packages.gitlab.com/install/repositories/gitlab/gitlab-ee/sc
 B2. sudo apt-get install gitlab-ee=14.4.1-ee.0
 - Setting server
 * Thêm domain
-B1. vi /etc/hosts => Thêm địa chỉ và domain: 192.168.158.98 gitlab.huynqdevops.vn
+B1. vi /etc/hosts => Thêm địa chỉ và domain: 192.168.198.130 gitlab.elroydevops.tech
 B2. vi /etc/gitlab/gitlab.rb
-    Sửa: external_url 'http://gitlab.example.com' => external_url 'http://gitlab.huynqdevops.vn'
+    Sửa: external_url 'http://gitlab.example.com' => external_url 'http://gitlab.elroydevops.tech'
 B3. sudo gitlab-ctl reconfigure => Lưu cấu 
-B4. Cập nhật file hosts trên laptop cá nhân C:\Windows\System32\drivers\etc\hosts: 192.168.158.98 gitlab.huynqdevops.vn
-B4. Truy cập web http://gitlab.huynqdevops.vn
-B5. Tài khoản/password lấy trên server: cat /etc/gitlb/initial_root_password => root / password (trong file) => Đổi password root / Quochuy221003@! - huynq1/1234567890
+B4. Cập nhật file hosts trên laptop cá nhân C:\Windows\System32\drivers\etc\hosts: 192.168.198.130 gitlab.elroydevops.tech
+B4. Truy cập web http://gitlab.elroydevops.tech
+B5. Tài khoản/password lấy trên server: cat /etc/gitlab/initial_root_password => root / password (trong file) => Đổi password root / Quochuy221003@! - huynq1/1234567890
 
 ** Câu lệnh gitlab
 gitlab-ctl status: Kiểm tra trạng thái gitlab

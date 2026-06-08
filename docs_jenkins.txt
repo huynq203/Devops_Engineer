@@ -1,0 +1,84 @@
+=============== Tài liệu cài jenkins server ==============================
+I. Cài jenkins
+B1. Tạo folder tools: mkdir -p tools/jenkins
+B2. Tạo file batch: vi install-jenkins.sh
+#!/bin/bash
+set -e
+
+apt-get update
+
+apt-get install -y wget fontconfig openjdk-21-jre
+
+mkdir -p /etc/apt/keyrings
+
+wget -O /etc/apt/keyrings/jenkins-keyring.asc \
+  https://pkg.jenkins.io/debian-stable/jenkins.io-2026.key
+
+echo "deb [signed-by=/etc/apt/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/" > \
+  /etc/apt/sources.list.d/jenkins.list
+
+apt-get update
+apt-get install -y jenkins
+
+systemctl enable --now jenkins
+
+ufw allow 8080 || true
+
+echo "Jenkins initial password:"
+cat /var/lib/jenkins/secrets/initialAdminPassword
+B3. Cấp quyền thực thi: chmod +x install-jenkins.sh
+B4. Cài đặt jenkins: sh install-jenkins.sh
+B5. Cấu hình domain jenkins: vi /etc/hosts => 192.168.198.131 jenkins.elroydevops.tech
+Cấu hình bên laptop ở file hosts để có thể truy cập bằng domain
+=> Sau khi cấu hình xong truy cập: jenkins.elroydevops.tech:8080
+
+=========================== Cấu hình revert từ port 8080 sang port 80 ========================
+B1. Cài nginx: apt-get update => apt-get install nginx -y
+B2. Vào folder conf.d tạo file jenkins.elroydevops.tech.conf: cd /etc/nginx/conf.d => vi jenkins.elroydevops.tech.conf
+server {
+  listen 80;
+  server_name jenkins.elroydevops.tech;
+  location / {
+    proxy_pass http://127.0.0.1:8080;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection keep_alive;
+    proxy_set_header Host $host;
+    proxy_cache_bypass $http_upgrade;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+  }
+}
+B3. Restart nginx: systemctl restart nginx
+
+================================ Kết nối tới gitlab + server dự án ===========================
+1. Trước tiên kiểm tra 2 version java xem có giống nhau không?
+  - Nếu không giống phải cài java cùng 1 version 2 server ec2-server và jenkins-server
+  - Cài version java của 2 server: apt install openjdk-11-jdk -y
+  - Chọn java version 11: update-alternatives --config java => Chọn số tường ứng
+2. Tạo user jenkins trên ec2-server: adduser jenkins
+3. Lên UI jenkins => Manage jenkins => Nodes => New Nodes => Điền các thông tin cần thiết:
+  - Name
+  - Lable
+  - Number of executors: Số lượng dự án
+  - Nếu có Custom workdir path thì điền: /var/lib/jenkins và phải tạo thư mục này trên ec2-server: mkdir -p /var/lib/jenkins => thư mục này sẽ giống thư mục /var/lib/jenkins trên jenkins-server nhưng trên ec2-server chỉ chứa dự án 
+  - Vào manage jenkins => Security => Chọn Agents => Chọn Fixed => Điền port ít sử dụng có trên jenkins-server => Ví dụ điền port 8999 => Lúc này để kiểm tra xem lên chưa gõ netstat -tlpun
+4. Kết nối jenkins agents với ec2-server
+  - Ấn vào nodes vừa tạo sẽ ra hướng dẫn kết nối
+  - Phân người sở hữu nhóm sở hữu đối với /var/lib/jenkins user jenkins: chown jenkins. /var/lib/jenkins
+  - Vào folder /var/lib/jenkins chuyển sang user jenkins => su jenkins
+  - Trên UI jenkins chọn hướng dẫn Or run from agent command line, with the secret stored in a file: (Unix) vì bảo mật có file secret chạy lần lượt theo hướng dẫn chạy trên ec2-user ở folder /var/lib/jenkins với user jenkins:
+    + echo 36cc6373ed9b172692ebbc95837ba291b74a33252d18fbf09289ff14782ef5ce > secret-file
+    + curl -sO http://jenkins.elroydevops.tech:8080/jnlpJars/agent.jar
+    + java -jar agent.jar -url http://jenkins.elroydevops.tech:8080/ -secret @secret-file -name "ec2-server" -webSocket -workDir "/var/lib/jenkins" > nohup.out 2>&1 &
+=> Hoàn tất kết nối giữa server dự án và server jenkins
+5. Tạo folder chứa dự trên UI jenkins
+  - Ra dashboard jenkins
+  - Chọn New item => Chọn folder => Đặt tên và save
+6. Kết nối jenkins server tới gitlab server
+  - Vào manage jenkins => plugin => Chọn Availabe plugin => Tìm kiếm gitlab và blue ocean và tích => Install và chọn tick restart jenkins-server khi cài thành công
+  - Vào Manage jenkins => Chọn system => Kéo xuống có gitlab điền các thông tin
+    + tên: gitlab-server
+    + url: http://gitlab.elroydevops.tech/
+    + token api
+      * Vào gitlab tạo user jenkins có quyền admin
