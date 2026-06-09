@@ -1,0 +1,94 @@
+========================================= Lộ trình Kubernetes ==========================================================
+========================================= Mở đầu Kubernetes ============================================================
+========================================= Cài đặt cụm Kubernetes Onpremise =======================================================
+# Link bài giảng: https://devopsedu.vn/courses/khoa-hoc-kubenetes-thuc-te/lesson/bai-5-trien-khai-kubernetes-cluster-tren-on-premise-2/?page_tab=overview
+# Cài đặt cụm K8s trên On-premise
+1. Cấu hình tài nguyên
+Hostname	        OS	                IP	    RAM (tối thiểu)	CPU (tối thiểu)
+k8s-master-1	Ubuntu 22.04	192.168.109.131	    3G	            2
+k8s-master-2	Ubuntu 22.04	192.168.109.132	    3G	            2
+k8s-master-3	Ubuntu 22.04	192.168.109.133	    3G	            2
+2. Thực hiện trên cả 3 servers
+vi /etc/hosts
+192.168.109.131 k8s-master-1
+192.168.109.132 k8s-master-2
+192.168.109.133 k8s-master-3
+3. Tạo user devops và chuyển sang user devops trên 3 server: adduser devops
+4. Phân quyền user devops vào group sudo để có quyền thực thi: chmod -aG sudo devops
+5. Tắt swap để có thể call api của cụm: sudo swapoff -a => Chỉ tắt tạm thời khi server khởi động lại sẽ tự bật
+Để tắt vĩnh viễn: vi /etc/fstab và comment /swap.img       none    swap    sw      0       0
+hoặc dùng câu lệnh: sudo sed -i '/swap.img/s/^/#/' /etc/fstab
+6. Cấu hình module kernel: sudo tee /etc/modules-load.d/containerd.conf <<EOF
+overlay
+br_netfilter
+EOF
+8. Chạy lệnh để Tải module kernel: sudo modprobe overlay và sudo modprobe br_netfilter
+9. Cấu hình hệ thống mạng: sudo tee /etc/sysctl.d/kubernetes.conf <<EOF
+net.bridge.bridge-nf-call-ip6tables=1
+net.bridge.bridge-nf-call-iptables=1
+net.ipv4.ip_forward=1
+EOF
+10. Chạy lệnh để Áp dụng cấu hình sysctl: sudo sysctl --system
+11. Cài các gói phụ trợ để Cài đặt các gói cần thiết và thêm kho Docker:
+    # sudo apt install -y curl gnupg2 software-properties-common apt-transport-https ca-certificates
+    # sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmour -o /etc/apt/trusted.gpg.d/docker.gpg
+    # sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" 
+12.Cài đặt containerd
+    # sudo apt update -y
+    # sudo apt install -y containerd.io
+13.Cấu hình containerd
+    # containerd config default | sudo tee /etc/containerd/config.toml >/dev/null 2>&1
+    # sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/g' /etc/containerd/config.toml
+14.Khởi động containerd
+    # sudo systemctl restart containerd
+    # sudo systemctl enable containerd
+15.Thêm kho lưu trữ Kubernetes
+    # sudo mkdir -p /etc/apt/keyrings
+    # echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+    # curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+16.Cài đặt các gói Kubernetes
+    # sudo apt update -y
+    # sudo apt install -y kubelet kubeadm kubectl
+    # sudo apt-mark hold kubelet kubeadm 
+
+*Mô hình đầu tiên:  1 master 2 worker
+
+    -Thực hiện trên server k8s-master-1 làm master
+        # sudo kubeadm init
+        # mkdir -p $HOME/.kube
+        # sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+        # sudo chown $(id -u):$(id -g) $HOME/.kube/config
+        # kubectl get nodes
+        # thêm network calico để hoạt động cụm
+        # kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/calico.yaml
+    -Thực hiện trên server k8s-master-2 và k8s master-3 làm worker
+        # sudo kubeadm join 192.168.1.111:6443 --token your_token --discovery-token-ca-cert-hash your_sha 
+        # ex: sudo kubeadm join 192.168.109.131:6443 --token 8frm5a.ku9amr3mclw623p9 \ --discovery-token-ca-cert-hash sha256:8bb7f14eada01ee1af0adb3ad424e3e3528e3ac59b9e1fab58277ae73933fc6c
+
+*Mô hình thứ hai: 3 server vừa master vừa worker – xem video bài giảng để hiểu
+
+    -Thực hiện trên server k8s-master-1
+        # sudo kubeadm init --control-plane-endpoint "192.168.109.131:6443" --upload-certs
+        # mkdir -p $HOME/.kube 
+        # sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config 
+        # sudo chown $(id -u):$(id -g) $HOME/.kube/config
+        # kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/calico.yaml
+    -Thực hiện trên server k8s-master-2 và k8s-master-3
+        # sudo kubeadm join 192.168.1.111:6443 --token your_token --discovery-token-ca-cert-hash your_sha --control-plane --certificate-key your_cert
+        # mkdir -p $HOME/.kube 
+        # sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config 
+        # sudo chown $(id -u):$(id -g) $HOME/.kube/config
+    -Chỉ định ô đang làm master làm cả worker:
+        # kubectl taint nodes k8s-master-1 node-role.kubernetes.io/control-plane:NoSchedule-
+Chú ý: Để reset trắng các cụm và cài lại dùng câu lệnh trên tất cả server:
+    + sudo kubeadm reset -f
+    + sudo rm -rf /var/lib/etcd
+    + sudo rm -rf /etc/kubenetes/manifests/*
+
+========================================= Cài đặt cụm Kubernetes Cloud bằng GCP (GKE) ========================================
+Link bài giảng: https://devopsedu.vn/courses/khoa-hoc-kubenetes-thuc-te/lesson/bai-6-trien-khai-kubernetes-cluster-tren-cloud-gke-2/
+1. Lên google cloud platform => Tìm kiếm Kubernetes Cluster => Chọn cluster => Enable Kubernetes API Server
+========================================= Triển khai dự án Kubernetes ==================================================
+========================================= Triển khai công cụ trên Kubernetes ===========================================
+========================================= Giám sát và quản trị cụm Kubernetes ==========================================
+========================================= Kubernetes thực tế doanh nghiệp ==============================================

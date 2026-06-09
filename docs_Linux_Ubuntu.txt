@@ -103,7 +103,7 @@ grep -i keyword file_name: Tìm kiếm không phân biệt chữ Hoa/thường
 grep -n keyword file_name: Hiển thị vị trí số dòng keyword đứng dòng nào
 grep -c keyword file_name: Đếm số từ có từ keyword
 grep -E "keyword1,keyword2" filename: Tìm dòng chứa keyword1 hoặc keyword2 (tìm nhiều từ)
-
+Tên câu lệnh | grep option keyword
 * Tìm kiếm file/folder trong hệ thống:
 find . -name "file_name" : Tìm thư mục hiện tại có tên là file_name
 find . -iname "file_name" : Tìm thư mục hiện tại có tên là file_name (Không pb hoa/thường)
