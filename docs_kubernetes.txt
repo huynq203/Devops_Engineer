@@ -1,6 +1,44 @@
 ========================================= Lộ trình Kubernetes ==========================================================
 ========================================= Mở đầu Kubernetes ============================================================
-========================================= Cài đặt cụm Kubernetes Onpremise =======================================================
+Cấu trúc Kubernetes: User / CLI  --->  Control Plane / Master Node  --->  Worker Nodes
+
+1. Control Plane / Master Node: Chịu trách nhiệm quản lý toàn bộ cluster Kubernetes
+Gồm các thành phần chính: API Server, etcd, Controller Manager (CM), Scheduler
+- API Server thành phần trung tâm nhất của Kubernetes Control Plane có nhiệm vụ:
+Nhận request từ kubectl, UI hoặc hệ thống bên ngoài
+Kiểm tra request có hợp lệ không
+Kiểm tra quyền truy cập
+Ghi hoặc đọc trạng thái cluster từ etcd
+Làm cổng giao tiếp giữa các thành phần Kubernetes
+
+- etcd: Là nơi lưu trữ dữ liệu trạng thái Kubernetes gồm các thông tin: Danh sách Node, Danh sách Pod, Deployment, Service, ConfigMap, Secret, Namespace, Trạng thái mong muốn của ứng dụng, Trạng thái thực tế của cluster
+
+- Controller Manager là thành phần chạy nhiều controller khác nhau trong Kubernetes.Controller có nhiệm vụ liên tục quan sát cluster và đảm bảo: Trạng thái thực tế = Trạng thái mong muốn. Ví dụ bạn khai báo muốn có 3 Pod, nhưng thực tế chỉ còn 2 Pod vì 1 Pod bị lỗi. Controller Manager sẽ phát hiện sự chênh lệch này và yêu cầu tạo thêm Pod mới.
+
+- Scheduler chịu trách nhiệm chọn Worker Node phù hợp để chạy Pod mới. Khi một Pod mới được tạo ra, ban đầu Pod đó chưa biết sẽ chạy ở Node nào. Scheduler sẽ xem xét nhiều yếu tố để quyết định. Scheduler kiểm tra: Node nào còn CPU, Node nào còn RAM, Pod yêu cầu tài nguyên bao nhiêu, Node có label phù hợp không, Có taint/toleration không, Có affinity/anti-affinity không, Có giới hạn hoặc ràng buộc nào không. Sau đó Scheduler sẽ gán Pod vào một Node cụ thể.
+2. Worker Node
+a. Kubelet
+- Kubelet là một agent chạy trên mỗi Worker Node. Nhiệm vụ chính của Kubelet là đảm bảo các container trong Pod đang chạy đúng theo yêu cầu từ Control Plane. Kubelet trên Worker Node sẽ nhận thông tin đó, rồi gọi Container Runtime để tạo container. Kubelet làm các việc như: Nhận yêu cầu chạy Pod từ API Server, Gọi Container Runtime để tạo container, Theo dõi trạng thái container, Restart container nếu bị lỗi, tùy theo restart policy, Báo trạng thái Pod và Node về API Server. Nó không tự quyết định chạy Pod nào. Việc Pod chạy ở Node nào là do Scheduler quyết định. Sau đó Kubelet thực thi việc chạy Pod đó.
+b. Kube-Proxy
+- Kube-Proxy là thành phần xử lý network trên mỗi Worker Node. Nó giúp các Pod và Service có thể giao tiếp với nhau.
+Ví dụ: bạn có một Service tên là: payment-service, service này trỏ tới 3 Pod: payment-pod-1, payment-pod-2, payment-pod-3. Khi một request đi tới payment-service, Kube-Proxy sẽ giúp điều hướng request đó tới một trong các Pod phù hợp.
+Kube-Proxy quản lý các rule mạng trên node, ví dụ: iptables, IPVS.
+Nhiệm vụ của Kube-Proxy: Quản lý network rules, Cho phép Pod giao tiếp với Pod khác, Cho phép Service route traffic tới Pod, Hỗ trợ load balancing nội bộ giữa các Pod
+c. Container Runtime
+- Container Runtime là thành phần thực sự chạy container. Kubernetes không tự mình chạy container trực tiếp. Nó cần một runtime để làm việc này.
+- Một số container runtime phổ biến: containerd, CRI-O, Docker
+- Trong các phiên bản Kubernetes hiện đại, containerd thường được dùng phổ biến hơn Docker. Container Runtime làm các việc như: Pull image từ registry, Tạo container, Start container, Stop container, Quản lý vòng đời container
+* Luồng đơn giản: 
+API Server thông báo cho Kubelet
+        ↓
+Kubelet yêu cầu Container Runtime
+        ↓
+Container Runtime pull image và chạy container
+        ↓
+Container nằm trong Pod bắt đầu chạy
+
+
+========================================= Cài đặt cụm Kubernetes Onpremise =============================================
 # Link bài giảng: https://devopsedu.vn/courses/khoa-hoc-kubenetes-thuc-te/lesson/bai-5-trien-khai-kubernetes-cluster-tren-on-premise-2/?page_tab=overview
 # Cài đặt cụm K8s trên On-premise
 1. Cấu hình tài nguyên
