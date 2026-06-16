@@ -57,7 +57,7 @@ B1. Copy project, giải nén, tạo user, gán quyền, phân quyền
 B2. Check file pom.xml => Mục đích xem version java là bao nhiêu để cài công cụ => Cài java https://www.rosehosting.com/blog/how-to-install-java-17-lts-on-ubuntu-20-04/?srsltid=AfmBOopk4CUWUVv9p9AHvrpKtstpg6a4g1XNJzyi90R0hre1-heomcRk
 	- apt-get update
 	- apt-get upgrade
-	- apt install openjdk-17-jdk openjdk-17-jre
+	- apt install openjdk-17-jdk openjdk-17- -y
 => Kiểm tra version: java -version
 B3. Cài maven => https://phoenixnap.com/kb/install-maven-on-ubuntu
 	- apt-get update

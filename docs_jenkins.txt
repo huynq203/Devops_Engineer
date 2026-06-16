@@ -63,7 +63,7 @@ B3. Restart nginx: systemctl restart nginx
   - Number of executors: Số lượng dự án
   - Nếu có Custom workdir path thì điền: /var/lib/jenkins và phải tạo thư mục này trên ec2-server: mkdir -p /var/lib/jenkins => thư mục này sẽ giống thư mục /var/lib/jenkins trên jenkins-server nhưng trên ec2-server chỉ chứa dự án 
   - Vào manage jenkins => Security => Chọn Agents => Chọn Fixed => Điền port ít sử dụng có trên jenkins-server => Ví dụ điền port 8999 => Lúc này để kiểm tra xem lên chưa gõ netstat -tlpun
-4. Kết nối jenkins agents với ec2-server
+4. Kết nối jenkins agents với ec2-server (Tạo agent)
   - Ấn vào nodes vừa tạo sẽ ra hướng dẫn kết nối
   - Phân người sở hữu nhóm sở hữu đối với /var/lib/jenkins user jenkins: chown jenkins. /var/lib/jenkins
   - Vào folder /var/lib/jenkins chuyển sang user jenkins => su jenkins
@@ -75,10 +75,24 @@ B3. Restart nginx: systemctl restart nginx
 5. Tạo folder chứa dự trên UI jenkins
   - Ra dashboard jenkins
   - Chọn New item => Chọn folder => Đặt tên và save
-6. Kết nối jenkins server tới gitlab server
+6. Kết nối jenkins server tới gitlab server 
   - Vào manage jenkins => plugin => Chọn Availabe plugin => Tìm kiếm gitlab và blue ocean và tích => Install và chọn tick restart jenkins-server khi cài thành công
   - Vào Manage jenkins => Chọn system => Kéo xuống có gitlab điền các thông tin
     + tên: gitlab-server
     + url: http://gitlab.elroydevops.tech/
     + token api
       * Vào gitlab tạo user jenkins có quyền admin
+      * Vào edit profile => Access Token => Điền các thông tin như sau: Token name, Select scopes chọn api => Token: kqrZXCvez1cwY_HX3UHF
+    + Credentials: Chọn Add gitlab api token điền các thông tin Vào
+    => Sau đó test connection nếu thành công hiển thị success
+7. Tạo project 
+  - Vào agent vừa tạo => Chọn new item => Chọn pipeline => Đăt tên project shoeshop
+  - Cấu hình file sẽ chọn các thông tin như điền url gitlab, nhánh, và điền file Jenkinsfile
+8. Cấu hình webhooks
+  - Lên gitlab vào project => Vào setting chọn webhooks
+  URL: http://<user jenkins>:<token jenkins>@<địa chỉ jenkins>/project/<đường dẫn dự án trên jenkins>
+  - Vào admin => setting => Netword => Tìm Outbound requests => Chọn Allow requests to the local network from web hooks and services để mở cổng
+  - Lên jenkin => profile => Security => Chọn api token tạo token : 111a425aa822d39671f142fb020de16cf0 => URL:http://admin:111a425aa822d39671f142fb020de16cf0@jenkins.elroydevops.tech/project/Action_in_lab/shoeshop
+  Trigger chọn: Push events, Tag push events, Merge request events và bỏ tích Enable SSL verification
+  Test ra http 200 là thành công
+9. Tạo file Jenkinsfile
