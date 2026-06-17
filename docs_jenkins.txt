@@ -96,3 +96,89 @@ B3. Restart nginx: systemctl restart nginx
   Trigger chọn: Push events, Tag push events, Merge request events và bỏ tích Enable SSL verification
   Test ra http 200 là thành công
 9. Tạo file Jenkinsfile
+pipeline {
+    agent {
+        label 'ec2-server'
+    }
+
+    environment {
+        appUser = "shoeshop"
+        appName = "shoe-ShoppingCart"
+        appVersion = "0.0.1-SNAPSHOT"
+        appType = "jar"
+        pathParent = "/home/shoeshop"
+        processName = "${appName}-${appVersion}.${appType}"
+        folderDeploy = "${pathParent}/datas/${appUser}"
+        projectFolder = "${pathParent}/projects/shoeshop"
+    }
+
+    stages {
+        stage('build') {
+            steps {
+                sh(
+                    label: "Build with Maven",
+                    script: '''
+                        sudo -n -u ${appUser} -H bash -lc "
+                            cd ${projectFolder}
+                            mvn clean install -DskipTests=true
+                        "
+                    '''
+                )
+            }
+        }
+
+        stage('deploy') {
+            steps {
+                sh(
+                    label: "Prepare deploy folder",
+                    script: '''
+                        sudo -n chown -R ${appUser}. ${folderDeploy}
+                    '''
+                )
+
+                sh(
+                    label: "Copy jar file",
+                    script: '''
+                        sudo -n -u ${appUser} -H bash -lc "
+                            cp ${projectFolder}/target/${processName} ${folderDeploy}/
+                        "
+                    '''
+                )
+
+                sh(
+                    label: "Kill old process",
+                    script: '''
+                        PID=$(pgrep -f "${processName}" || true)
+
+                        if [ -n "$PID" ]; then
+                            echo "Killing old process: $PID"
+                            sudo -n kill -9 $PID
+                        else
+                            echo "No old process found"
+                        fi
+                    '''
+                )
+
+                sh(
+                    label: "Run new app",
+                    script: '''
+                        sudo -n -u ${appUser} -H bash -lc "
+                            cd ${folderDeploy}
+                            nohup java -jar ${processName} > nohup.out 2>&1 &
+                        "
+                    '''
+                )
+
+                sh(
+                    label: "Check app process",
+                    script: '''
+                        sleep 3
+                        ps -ef | grep ${processName} | grep -v grep || true
+                        echo "Log:"
+                        tail -n 50 ${folderDeploy}/nohup.out || true
+                    '''
+                )
+            }
+        }
+    }
+}
