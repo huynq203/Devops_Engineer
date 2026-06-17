@@ -126,6 +126,119 @@ Chú ý: Để reset trắng các cụm và cài lại dùng câu lệnh trên t
 ========================================= Cài đặt cụm Kubernetes Cloud bằng GCP (GKE) ========================================
 Link bài giảng: https://devopsedu.vn/courses/khoa-hoc-kubenetes-thuc-te/lesson/bai-6-trien-khai-kubernetes-cluster-tren-cloud-gke-2/
 1. Lên google cloud platform => Tìm kiếm Kubernetes Cluster => Chọn cluster => Enable Kubernetes API Server
+2. Vào Kubernestes Engine => Chọn cluster => Chọn Create
+    - Chọn Standard: You manage your cluster
+
+========================================= File Yaml cấu hình trong Kubernetes ==========================================
+Trong Kubernetes, file cấu hình thường viết bằng YAML. File YAML dùng để khai báo tài nguyên như Namespace, Pod, Deployment, Service, Ingress, ConfigMap, Secret,...
+Cấu trúc cơ bản của một file YAML Kubernetes:
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shoeshop-app
+  namespace: shoeshop
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: shoeshop
+  template:
+    metadata:
+      labels:
+        app: shoeshop
+    spec:
+      containers:
+        - name: shoeshop
+          image: nginx:latest
+          ports:
+            - containerPort: 80
+Các phần chính:
+    - apiVersion: Phiên bản API của Kubernetes resource.
+        + Pod	v1
+        + Service	v1
+        + Namespace	v1
+        + ConfigMap	v1
+        + Secret	v1
+        + ResourceQuota v1
+        + Deployment	apps/v1
+        + StatefulSet	apps/v1
+        + DaemonSet	apps/v1
+        + Job	batch/v1
+        + CronJob	batch/v1
+        + Ingress	networking.k8s.io/v1
+    => Vd: Dùng cho Deployment => apiVersion: apps/v1
+    - kind: là loại tài nguyên Kubernetes bạn muốn tạo.
+        + Pod	Đơn vị nhỏ nhất, chứa container chạy app
+        + Deployment	Deploy app, quản lý Pod, replica, rolling update
+        + Service	Mở đường truy cập vào Pod
+        + Namespace	Chia môi trường/project trong cluster
+        + ConfigMap	Lưu cấu hình thường, ví dụ biến môi trường
+        + Secret	Lưu thông tin nhạy cảm như password, token
+        + Ingress	Routing HTTP/HTTPS từ bên ngoài vào service
+        + PersistentVolume	Khai báo volume lưu trữ vật lý
+        + PersistentVolumeClaim	App yêu cầu dung lượng lưu trữ
+        + StatefulSet	Chạy app có trạng thái như database
+        + DaemonSet	Chạy một Pod trên mỗi Node
+        + Job	Chạy task một lần rồi kết thúc
+        + CronJob	Chạy task theo lịch
+        + ReplicaSet	Đảm bảo số lượng Pod, thường do Deployment quản lý
+        + ResourceQuota Giới hạn tài nguyên
+    => VD: Dùng cho Deployment => kind: Deployment
+    - metadata là phần chứa thông tin nhận diện của resource. resource này tên gì
+        + metadata thường có các field hay dùng:
+            name	Tên resource
+            namespace	Namespace chứa resource (Là 1 không gian để có thể triển fe,be)
+            labels	Nhãn để phân loại, match selector
+            annotations	Ghi chú/cấu hình phụ cho tool khác
+        VD: metadata: 
+                name: shoeshop-app
+                namespace: shoeshop
+                labels:
+                    app: shoeshop
+                annotations: 
+                    description: "Shoeshop Java application"
+    - spec là phần khai báo bạn muốn resource đó chạy/cấu hình như thế nào. resource này phải làm gì, chạy ra sao
+    VD :    spec:
+                type: NodePort #expose service ra ngoài node
+                selector: #service trỏ tới Pod có label app=shoeshop
+                    app: shoeshop
+                ports:
+                    - port: 80 #port của service
+                    targetPort: 80 #port container bên trong Pod
+                    nodePort: 30080 #port mở trên node
+
+========================================= Namespace trong Kubernetes ===================================================
+Link bài giảng: https://devopsedu.vn/courses/khoa-hoc-kubenetes-thuc-te/lesson/bai-9-namespace-trong-kubernetes-2/
+namespace là 1 không gian riêng để có thể triển khai fe,be
+Các câu lệnh:
+    - kubectl get pod: Hiển thị các pod
+    - kubectl get pod --namespace default
+    - kubectl get ns(hoặc namespace): Hiển thị các namespace ở trên k8s
+    - kubectl create ns project-1: Tạo namespace với tên là project-1 vd: kubectl create ns shoeshop
+    - kubectl delete ns project-1: Xóa namespace với tên là project-1 vd: kubectl delete ns shoeshop
+    - kubectl apply -f ns.yaml: Để chạy chỉ định file ns.yaml tạo namespace
+    - kubectl apply -f ns.yaml: Xóa namespce ở ns.yaml (chứ k phải xóa file)
+    => Tuy nhiên, bình thường sẽ tạo 1 file yaml chứ không chạy bằng câu lệnh
+Tạo file yaml:
+B1. Tạo project: mkdir -p projects/project-1
+B2. Tạo file yaml: vi ns.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+    name: project-1
+B3: kubectl apply -f ns.yaml
+B4. Tạo file resourcequota.yaml : Mục đích để giới hạn tài nguyên => vi resourcequota.yaml
+apiVersion: v1
+kind: ResourceQuota #sử dụng tài nguyên ResourceQuota
+metadata:
+    name: mem-cpu-quota #đặt tên tùy ý
+    namespace: project-1 #trỏ đến namespace 
+spec:
+    hard:
+        requests.cpu: "2" #giới hạn cpu là 2
+        requests.memory: 4Gi # giới hạn ram là 4gb
+========================================= Phương pháp triển khai dự án trên Kubernetes =================================
+Link bài giảng: https://devopsedu.vn/courses/khoa-hoc-kubenetes-thuc-te/lesson/bai-10-phuong-phap-trien-khai-du-an-tren-kubernetes-hieu-qua-2/
 ========================================= Triển khai dự án Kubernetes ==================================================
 ========================================= Triển khai công cụ trên Kubernetes ===========================================
 ========================================= Giám sát và quản trị cụm Kubernetes ==========================================
