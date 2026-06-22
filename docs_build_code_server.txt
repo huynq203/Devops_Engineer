@@ -18,7 +18,7 @@ B6. Kiểm tra hoạt động => Check
 1. Build Dự án Nodejs
 - Cài nodejs và npm: sudo apt install nodejs npm -y
 - Nâp cấp Phiên bản node lên 18: curl -s https://deb.nodesource.com/setup_18.x | sudo bash
-	=> Sau đó cài lại npm apt install nodejs -y
+	=> Sau đó cài lại npm: apt install nodejs -y
 - Cài thư viện dự án: npm i
 - Build dự án: npm run build
 - Tạo user: adduser todolist

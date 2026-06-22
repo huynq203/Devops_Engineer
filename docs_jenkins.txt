@@ -1,4 +1,6 @@
 =============== Tài liệu cài jenkins server ==============================
+=============== Cài đặt jenkins và các chức năng chính ==============================
+Bài giảng: https://devopsedu.vn/courses/devops-for-freshers/lesson/bai-28-cai-dat-jenkins-va-cac-chuc-nang-chinh/
 I. Cài jenkins
 B1. Tạo folder tools: mkdir -p tools/jenkins
 B2. Tạo file batch: vi install-jenkins.sh
@@ -32,7 +34,7 @@ B5. Cấu hình domain jenkins: vi /etc/hosts => 192.168.198.131 jenkins.elroyde
 Cấu hình bên laptop ở file hosts để có thể truy cập bằng domain
 => Sau khi cấu hình xong truy cập: jenkins.elroydevops.tech:8080
 
-=========================== Cấu hình revert từ port 8080 sang port 80 ========================
+=========================== Cấu hình reverse proxy từ port 8080 sang port 80 ========================
 B1. Cài nginx: apt-get update => apt-get install nginx -y
 B2. Vào folder conf.d tạo file jenkins.elroydevops.tech.conf: cd /etc/nginx/conf.d => vi jenkins.elroydevops.tech.conf
 server {
@@ -51,7 +53,8 @@ server {
 }
 B3. Restart nginx: systemctl restart nginx
 
-================================ Kết nối tới gitlab + server dự án ===========================
+================================ Triển khai dự án Jenkins CI/CD Continus Deployment (Tự động deployment nếu pipiline pass) ===========================
+Bài giảng: https://devopsedu.vn/courses/devops-for-freshers/lesson/bai-29-trien-khai-jenkins-ci-cd-continuous-deployment/
 1. Trước tiên kiểm tra 2 version java xem có giống nhau không?
   - Nếu không giống phải cài java cùng 1 version 2 server ec2-server và jenkins-server
   - Cài version java của 2 server: apt install openjdk-11-jdk -y
@@ -88,12 +91,12 @@ B3. Restart nginx: systemctl restart nginx
 7. Tạo project 
   - Vào agent vừa tạo => Chọn new item => Chọn pipeline => Đăt tên project shoeshop
   - Cấu hình file sẽ chọn các thông tin như điền url gitlab, nhánh, và điền file Jenkinsfile
-8. Cấu hình webhooks
+8. Cấu hình  trên gitlab
   - Lên gitlab vào project => Vào setting chọn webhooks
   URL: http://<user jenkins>:<token jenkins>@<địa chỉ jenkins>/project/<đường dẫn dự án trên jenkins>
   - Vào admin => setting => Netword => Tìm Outbound requests => Chọn Allow requests to the local network from web hooks and services để mở cổng
   - Lên jenkin => profile => Security => Chọn api token tạo token : 111a425aa822d39671f142fb020de16cf0 => URL:http://admin:111a425aa822d39671f142fb020de16cf0@jenkins.elroydevops.tech/project/Action_in_lab/shoeshop
-  Trigger chọn: Push events, Tag push events, Merge request events và bỏ tích Enable SSL verification
+  Triggers chọn: Push events, Tag push events, Merge request events và bỏ tích Enable SSL verification
   Test ra http 200 là thành công
 9. Tạo file Jenkinsfile
 pipeline {
@@ -182,3 +185,97 @@ pipeline {
         }
     }
 }
+
+Cách triển khai thứ 2
+pipeline {
+    agent {
+        label 'ec2-server'
+    }
+
+    environment {
+        appUser = "shoeshop"
+        appName = "shoe-ShoppingCart"
+        appVersion = "0.0.1-SNAPSHOT"
+        appType = "jar"
+        pathParent = "/home/shoeshop"
+        processName = "${appName}-${appVersion}.${appType}"
+        folderDeploy = "${pathParent}/datas/${appUser}"
+        projectFolder = "${pathParent}/projects/shoeshop"
+    }
+
+    stages {
+        stage('checkout scm') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('build') {
+            steps {
+                sh(
+                    label: "Build with Maven",
+                    script: '''
+                        mvn clean install -DskipTests=true
+                    '''
+                )
+            }
+        }
+
+        stage('deploy') {
+            steps {
+                sh(
+                    label: "Prepare deploy folder",
+                    script: '''
+                        sudo -n chown -R ${appUser}. ${folderDeploy}
+                    '''
+                )
+
+                sh(
+                    label: "Copy jar file",
+                    script: '''
+                        sudo -n -u ${appUser} -H bash -lc "
+                            cp ${WORKSPACE}/target/${processName} ${folderDeploy}/
+                        "
+                    '''
+                )
+
+                sh(
+                    label: "Kill old process",
+                    script: '''
+                        PID=$(pgrep -f "${processName}" || true)
+
+                        if [ -n "$PID" ]; then
+                            echo "Killing old process: $PID"
+                            sudo -n kill -9 $PID
+                        else
+                            echo "No old process found"
+                        fi
+                    '''
+                )
+
+                sh(
+                    label: "Run new app",
+                    script: '''
+                        sudo -n -u ${appUser} -H bash -lc "
+                            cd ${folderDeploy}
+                            nohup java -jar ${processName} > nohup.out 2>&1 &
+                        "
+                    '''
+                )
+
+                sh(
+                    label: "Check app process",
+                    script: '''
+                        sleep 3
+                        ps -ef | grep ${processName} | grep -v grep || true
+                        echo "Log:"
+                        tail -n 50 ${folderDeploy}/nohup.out || true
+                    '''
+                )
+            }
+        }
+    }
+}
+
+
+================================ Triển khai dự án Jenkins CI/CD Continus Delyvery (luôn sẵn sàng deploy, nhưng deploy production cần người bấm duyệt) ===========================
