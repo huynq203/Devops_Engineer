@@ -111,6 +111,7 @@ find . -iname "file_name" : Tìm thư mục hiện tại có tên là file_name 
 * Câu lệnh nâng cao Linux
 free -m: Kiểm tra trạng thái RAM
 df -h: Kiểm tra trạng thái disk
+lsblk: Thông tin disk gắn vào hệ thống
 top: Hiển thị toàn bộ thông tin RAM, DISK
 hostnamectl set-hostname + Hostname_new || vi /etc/hostname: Đổi tên server => Khởi động lại server
 reboot: Khởi động lại server

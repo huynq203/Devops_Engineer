@@ -41,11 +41,13 @@ Container nằm trong Pod bắt đầu chạy
 ========================================= Cài đặt cụm Kubernetes Onpremise =============================================
 # Link bài giảng: https://devopsedu.vn/courses/khoa-hoc-kubenetes-thuc-te/lesson/bai-5-trien-khai-kubernetes-cluster-tren-on-premise-2/?page_tab=overview
 # Cài đặt cụm K8s trên On-premise
-1. Cấu hình tài nguyên
-Hostname	        OS	                IP	    RAM (tối thiểu)	CPU (tối thiểu)
-k8s-master-1	Ubuntu 22.04	192.168.109.131	    3G	            2
-k8s-master-2	Ubuntu 22.04	192.168.109.132	    3G	            2
-k8s-master-3	Ubuntu 22.04	192.168.109.133	    3G	            2
+1. Cấu hình tài nguyên - thông tin server
+ec2-server / 123456
+Server              Hostname	        OS	                IP	    RAM (tối thiểu)	CPU (tối thiểu)     Disk            Domain
+k8s-master-1     k8s-master-1	    Ubuntu 22.04	192.168.109.131	    3G	            2               20
+k8s-master-2     k8s-master-2	    Ubuntu 22.04	192.168.109.132	    3G	            2               20
+k8s-master-3     k8s-master-3	    Ubuntu 22.04	192.168.109.133	    3G	            2               20
+rancher-server   rancher-server     Ubuntu 22.04	192.168.109.134	    2G	            1               20 && 10   rancher.elroydevops.vn
 2. Thực hiện trên cả 3 servers
 vi /etc/hosts
 192.168.109.131 k8s-master-1
@@ -113,6 +115,9 @@ EOF
         # kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/calico.yaml
     -Thực hiện trên server k8s-master-2 và k8s-master-3
         # sudo kubeadm join 192.168.1.111:6443 --token your_token --discovery-token-ca-cert-hash your_sha --control-plane --certificate-key your_cert
+        # vd: kubeadm join 192.168.109.131:6443 --token rxvl9p.1b9pq5w5dfvu3bx1
+        --discovery-token-ca-cert-hash sha256:cd8ed7e337bee0ab2ddb899c0f76a06f8dbebbb58de06817ffadfd7bb804c10e
+        --control-plane --certificate-key 526b41374a76375f8a8a47f9df153f2ef1ac0e3de29c3dd36185816608897a27
         # mkdir -p $HOME/.kube 
         # sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config 
         # sudo chown $(id -u):$(id -g) $HOME/.kube/config
@@ -123,7 +128,7 @@ Chú ý: Để reset trắng các cụm và cài lại dùng câu lệnh trên t
     + sudo rm -rf /var/lib/etcd
     + sudo rm -rf /etc/kubenetes/manifests/*
 
-========================================= Cài đặt cụm Kubernetes Cloud bằng GCP (GKE) ========================================
+========================================= Cài đặt cụm Kubernetes Cloud bằng GCP (GKE) bình thường có 3 loại cloud: EKS, GKE, AKS ========================================
 Link bài giảng: https://devopsedu.vn/courses/khoa-hoc-kubenetes-thuc-te/lesson/bai-6-trien-khai-kubernetes-cluster-tren-cloud-gke-2/
 1. Lên google cloud platform => Tìm kiếm Kubernetes Cluster => Chọn cluster => Enable Kubernetes API Server
 2. Vào Kubernestes Engine => Chọn cluster => Chọn Create
@@ -239,7 +244,43 @@ spec:
         requests.memory: 4Gi # giới hạn ram là 4gb
 ========================================= Phương pháp triển khai dự án trên Kubernetes =================================
 Link bài giảng: https://devopsedu.vn/courses/khoa-hoc-kubenetes-thuc-te/lesson/bai-10-phuong-phap-trien-khai-du-an-tren-kubernetes-hieu-qua-2/
-========================================= Triển khai dự án Kubernetes ==================================================
-========================================= Triển khai công cụ trên Kubernetes ===========================================
-========================================= Giám sát và quản trị cụm Kubernetes ==========================================
-========================================= Kubernetes thực tế doanh nghiệp ==============================================
+# Tư duy triển khai dự án k8s chuẩn format nhanh chóng
+Nhu cầu => Sử dụng công cụ giao diện => Trích xuất file yml => Nghiên cứu cú pháp, foramt, giá trị, template, các tùy chọn khác,... => Triển khai tương tự chuẩn format
+========================================= Các công cụ quản lý K8s ===============================================
+# K8s Management Tool
+Command app: Dùng k9s
+Desktop app: Dùng lens k8s
+Windows app: Dùng rancher  => Hay dùng nhất
+========================================= Cài đặt triển khai rancher & tích hợp cụm K8s lên rancher =============
+B1. Tạo server rancher
+Lưu ý: Tiến hành tạo thêm hard disk(root) => Thực tế ko lưu dữ liệu ổ cứng ở hệ điều hành mà sẽ tạo ra 1 ổ cứng khác rồi gán vào server và sẽ lưu dữ liệu ở ổ cứng đó và đảm bảo server bị lỗi(docker rangcher) thì dữ liệu vẫn còn và chỉ cần lấy dữ liệu lưu vào server khác ứng dụng vẫn chạy được.
+B2. Mount ổ cứng vào server với thư mục mới
+    - lệnh lsblk: để kiểm tra thông tin disk Sẽ thấy thông tin sda là disk ban đầu là sda gắn vào folder /, sdb chưa gắn folder nào
+    - Format ổ sdb: mkfs.ext4 -m 0 /dev/sdb
+    - Tạo thư mục mount ổ sdb: mkdir /data
+    - Cấu hình map sdb vào /data: echo "dev/sdb /root/data etx4 defaults 0 0" | tee -a /etc/fstab
+    - Gõ df -h kiểm tra
+B3. Cài docker: apt install docker.io -y && apt install docker-compose -y
+B4. Cài đặt rancher vào thư mục vừa mount tạo folder rancher: mkdir -p /data/rancher
+vi docker-compose.yml
+version: '3'
+services:
+    rancher-server:
+        image: rancher/rancher:v2.9.2 # tùy vào version của k8s
+        container_name: rancher-server
+        restart: unless-stopped
+        ports:
+            - "80:80"
+            - "443:443"
+        volumes:
+            - /root/data/rancher/data:/var/lib/rancher
+        privileged: true
+
+B5. Lấy password: docker logs  container-id  2>&1 | grep "Bootstrap Password:" =>  => Đổi pass về: Quochuy221003@!
+B6. Cài helm install: kubectl get secret --namespace cattle-system bootstrap-secret -o go-template='{{.data.bootstrapPassword|base64decode}}{{"\n"}}'
+B7. Tích hợp k8s vào ranger => Chọn Home => Import Existing => Cluster => Generic => Điền tên sao cho tường minh => Sau đó copy dòng tự ký là dòng 2: curl --insecure -sfL https://192.168.109.134/v3/import/gqmbnl8mccbgjlvlkmxqgrjp4646rcq2v9qkbm6n5xbxbz2vkfvnpq_c-m-rkkc2bv9.yaml | kubectl apply -f -
+=> Tích hợp thành công cụm k8s với 3 node (3 server)
+========================================= Triển khai dự án K8s ==================================================
+========================================= Triển khai công cụ trên K8s ===========================================
+========================================= Giám sát và quản trị cụm K8s ==========================================
+========================================= K8s thực tế doanh nghiệp ==============================================
