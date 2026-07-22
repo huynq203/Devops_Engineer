@@ -1,9 +1,0 @@
-IP public: 18.143.40.118
-* ec2-server
-ssh -i C:\Users\Admin\Downloads\ec2-server.pem ubuntu@18.142.182.251 || ssh -i C:\Users\huynq1\Downloads\ec2-server.pem ubuntu@54.255.187.89
-
-* Tổng hợp tài liệu aws
-- aws documents
-- aws trainning
-- medium, udemy, dev.io
-- youtube

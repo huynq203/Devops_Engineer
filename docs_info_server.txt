@@ -1,7 +1,0 @@
-Máy cá nhân:
-gitlab-server: 192.168.198.132 => ec2-user/123456 tk root/Evnfc@123
-jenkins-server: 192.168.198.131 => ec2-user/123456 tk admin/123456
-ec2-server: 192.168.198.130 => ec2-user/123456
-
-Máy công ty:
-ec2-server: 192.168.109.130 => ec2-server/123456
