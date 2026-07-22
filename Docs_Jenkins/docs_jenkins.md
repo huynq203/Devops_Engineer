@@ -1,6 +1,10 @@
 # Tài liệu cài Jenkins Server
 
-## 1. Cài đặt Jenkins và các chức năng chính
+## 27. Jenkins là gì? Jenkins để làm gì?
+
+📺 **Bài giảng:** [Jenkins là gì? Jenkins để làm gì?](https://devopsedu.vn/courses/devops-for-freshers/lesson/bai-27-jenkins-la-gi-jenkins-de-lam-gi/)
+
+## 28. Cài đặt Jenkins và các chức năng chính
 
 📺 **Bài giảng:** [Bài 28 - Cài đặt Jenkins và các chức năng chính](https://devopsedu.vn/courses/devops-for-freshers/lesson/bai-28-cai-dat-jenkins-va-cac-chuc-nang-chinh/)
 
@@ -110,7 +114,7 @@ systemctl restart nginx
 
 ---
 
-## 2. Triển khai Jenkins CI/CD — Continuous Deployment
+## 29. Triển khai Jenkins CI/CD — Continuous Deployment
 
 > Tự động deployment nếu pipeline pass.
 
@@ -428,19 +432,23 @@ pipeline {
 
 ---
 
-## 3. Triển khai Jenkins CI/CD — Continuous Delivery
+## 30. Triển khai Jenkins CI/CD — Continuous Delivery
 
 > Luôn sẵn sàng deploy, nhưng deploy production cần người bấm duyệt.
 
+📺 **Bài giảng:** [Bài 30: Triển khai Jenkins CI/CD (Continuous Delivery)](https://devopsedu.vn/courses/devops-for-freshers/lesson/bai-30-trien-khai-jenkins-ci-cd-continuous-delivery/)
+
+### Cấu hình agent server khi khởi động server tự động kết nối tới jenkins
+
 Mỗi lần server tắt đi sẽ mất kết nối `ec2-server` tới Jenkins, nên sẽ tạo 1 service để khi server khởi động thì service sẽ tự chạy cùng.
 
-**Bước 1:** Ra ngoài root, tạo file service (thông tin giống file `Docs_Jenkins/jenkins-agent.service`):
+**Bước 1:** Ra ngoài root, tạo file `jenkins-agent.service`:
 
 ```bash
 vi /etc/systemd/system/jenkins-agent.service
 ```
 
-```ini
+```bash
 [Unit]
 # Mô tả service
 Description=Jenkins Agent Service
@@ -484,3 +492,119 @@ systemctl start jenkins-agent.service
 ```bash
 systemctl status jenkins-agent.service
 ```
+
+### Custom pipeline file `Jenkins` approve thủ công
+
+**Bước 1:**
+
+```groovy
+pipeline {
+    agent {
+        label 'ec2-server'
+    }
+
+    environment {
+        appUser = "shoeshop"
+        appName = "shoe-ShoppingCart"
+        appVersion = "0.0.1-SNAPSHOT"
+        appType = "jar"
+        pathParent = "/home/shoeshop"
+        processName = "${appName}-${appVersion}.${appType}"
+        folderDeploy = "${pathParent}/datas/${appUser}"
+        projectFolder = "${pathParent}/projects/shoeshop"
+    }
+
+    stages {
+        stage('checkout scm') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('build') {
+            steps {
+                sh(
+                    label: "Build with Maven",
+                    script: '''
+                        mvn clean install -DskipTests=true
+                    '''
+                )
+
+                sh(
+                    label: "Prepare deploy folder",
+                    script: '''
+                        sudo -n chown -R ${appUser}. ${folderDeploy}
+                    '''
+                )
+            }
+        }
+
+        stage('deploy') {
+            steps {
+                script {
+                    try {
+                        timeout(time: 5, unit: 'MINUTES') {
+                            env.useChoice = input message: "Can it be deployed?",
+                                parameters: [choice(name: deploy, choices: 'no\nyes', description: 'Choose "yes" if you want to deploy')]
+                        }
+                        if(env.useChoice == "yes"){
+                            sh(
+                                label: "Copy jar file",
+                                script: '''
+                                    sudo -n -u ${appUser} -H bash -lc "
+                                        cp ${WORKSPACE}/target/${processName} ${folderDeploy}/
+                                    "
+                                '''
+                            )
+
+                            sh(
+                                label: "Kill old process",
+                                script: '''
+                                    PID=$(pgrep -f "${processName}" || true)
+
+                                    if [ -n "$PID" ]; then
+                                        echo "Killing old process: $PID"
+                                        sudo -n kill -9 $PID
+                                    else
+                                        echo "No old process found"
+                                    fi
+                                '''
+                            )
+
+                            sh(
+                                label: "Run new app",
+                                script: '''
+                                    sudo -n -u ${appUser} -H bash -lc "
+                                        cd ${folderDeploy}
+                                        nohup java -jar ${processName} > nohup.out 2>&1 &
+                                    "
+                                '''
+                            )
+
+                            sh(
+                                label: "Check app process",
+                                script: '''
+                                    sleep 3
+                                    ps -ef | grep ${processName} | grep -v grep || true
+                                    echo "Log:"
+                                    tail -n 50 ${folderDeploy}/nohup.out || true
+                                '''
+                            )
+                        }else{
+                            echo "Do not confirm the deployment!"
+                        }
+                    }catch (exception err) {
+
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+## 31. Jenkins CI/CD parameter
+
+> Jenkins CI/CD nâng cao, cách triển khai cho Production
+
+📺 **Bài giảng:** [Bài 31: Jenkins CI/CD parameter](https://devopsedu.vn/courses/devops-for-freshers/lesson/bai-31-jenkins-ci-cd-parameter/)

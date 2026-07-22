@@ -182,7 +182,7 @@ Hoàn thành cấu hình Runner.
 
 # III. Viết Pipeline đầu tiên
 
-Tạo file:
+Tạo file `.gitlab-ci.yml`:
 
 ```
 .gitlab-ci.yml

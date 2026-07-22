@@ -168,10 +168,10 @@ chmod -R 777 /projects/todolist/dist/
 
 ## 7. Cấu hình Nginx
 
-Tạo file:
+Tạo file `todolist.conf`:
 
 ```
-/etc/nginx/conf.d/todolist.conf
+vi /etc/nginx/conf.d/todolist.conf
 ```
 
 Nội dung:
